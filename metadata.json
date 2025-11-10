@@ -1,0 +1,8 @@
+{
+  "name": "Cuidamet",
+  "description": "Cuidamet connects you with trusted local caregivers for your loved ones, including seniors, children, and pets. Find the perfect match near you with our location-based search, inspired by the simplicity of Wallapop.",
+  "requestFramePermissions": [
+    "geolocation",
+    "camera"
+  ]
+}

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cuidamet - Cuidamos de lo que te importa</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Leaflet Map Library -->
+  <link rel="preconnect" href="https://unpkg.com" crossorigin>
+  <link rel="preconnect" href="https://*.tile.openstreetmap.org" crossorigin>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+    }
+    /* Custom styles for Leaflet map markers */
+    .custom-marker-pin {
+      width: 44px;
+      height: 56px;
+      position: relative;
+      transition: transform 0.2s ease-in-out;
+    }
+    .custom-marker-pin .pin-body {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: white;
+      border: 3px solid var(--marker-color, #14b8a6); /* Default to teal-500 */
+      padding: 2px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      transition: all 0.2s ease-in-out;
+    }
+    .custom-marker-pin .pin-body img {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+    .custom-marker-pin .pin-pointer {
+      width: 0;
+      height: 0;
+      border-left: 10px solid transparent;
+      border-right: 10px solid transparent;
+      border-top: 15px solid var(--marker-color, #14b8a6); /* Default to teal-500 */
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      transition: all 0.2s ease-in-out;
+    }
+    .leaflet-tooltip {
+      background-color: #1f2937; /* slate-800 */
+      color: white;
+      border-radius: 4px;
+      padding: 4px 8px;
+      font-size: 12px;
+      font-weight: 600;
+      border: none;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+    .leaflet-tooltip-top:before {
+      border-top-color: #1f2937;
+    }
+    .custom-marker-pin.selected {
+      transform: scale(1.15) translateY(-6px);
+      z-index: 1000 !important;
+    }
+    .custom-marker-pin.selected .pin-body {
+      border-color: #f59e0b; /* amber-500 */
+      box-shadow: 0 0 15px rgba(245, 158, 11, 0.7);
+    }
+    .custom-marker-pin.selected .pin-pointer {
+        border-top-color: #f59e0b; /* amber-500 */
+    }
+  </style>
+<script type="importmap">
+{
+  "imports": {
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/"
+  }
+}
+</script>
+</head>
+<body class="bg-white">
+  <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+</html>
