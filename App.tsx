@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect } from 'react';
 import { CareCategory, Provider, ChatConversation, Message } from './types';
 import { MOCK_PROVIDERS } from './services/mockData';
@@ -13,7 +14,25 @@ import OfferService from './components/OfferService';
 import Inbox from './components/Inbox';
 import Chat from './components/Chat';
 import ProfilePage from './components/ProfilePage';
+import MyCaregiverProfilePage from './components/MyCaregiverProfilePage';
 import MapView from './components/MapView';
+import Footer from './components/Footer';
+import AboutUsPage from './components/AboutUsPage';
+import BlogPage from './components/BlogPage';
+import ContactPage from './components/ContactPage';
+import HelpCenterPage from './components/HelpCenterPage';
+import PricesPage from './components/PricesPage';
+import SecurityPage from './components/SecurityPage';
+import VerificationPage from './components/VerificationPage';
+import SettingsPage from './components/SettingsPage';
+import EditProfilePage from './components/EditProfilePage';
+import SecuritySettingsPage from './components/SecuritySettingsPage';
+import NotificationsPage from './components/NotificationsPage';
+import LegalInfoPage from './components/LegalInfoPage';
+import LegalDocumentPage from './components/LegalDocumentPage';
+import ConfirmationModal from './components/ConfirmationModal';
+import { legalDocuments } from './services/legalContent';
+
 
 const getDistanceInKm = (lat1: number, lon1: number, lat2: number, lon2: number) => {
   const R = 6371; // Radius of the Earth in kilometers
@@ -30,10 +49,19 @@ const getDistanceInKm = (lat1: number, lon1: number, lat2: number, lon2: number)
   return distance;
 };
 
+type View = 'landing' | 'providers' | 'favorites' | 'profile' | 'offer' | 'inbox' | 'chat' | 'myProfile' | 'map' | 'prices' | 'security' | 'verification' | 'help' | 'about' | 'blog' | 'contact' | 'settings' | 'editProfile' | 'securitySettings' | 'notifications' | 'legalInfo' | 'legalDocument' | 'myCaregiverProfile';
+
+export interface LegalDocument {
+  id: string;
+  title: string;
+  description: string;
+  content: React.ReactNode;
+}
+
 
 const App: React.FC = () => {
-  const [view, setView] = useState<'landing' | 'providers' | 'favorites' | 'profile' | 'offer' | 'inbox' | 'chat' | 'myProfile' | 'map'>('landing');
-  const [previousView, setPreviousView] = useState<'providers' | 'favorites' | 'map'>('providers');
+  const [view, setView] = useState<View>('landing');
+  const [previousView, setPreviousView] = useState<'providers' | 'favorites' | 'map' | 'settings' | 'myProfile' | 'legalInfo' | 'myCaregiverProfile'>('providers');
   const [selectedProviderId, setSelectedProviderId] = useState<number | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<CareCategory | 'all'>('all');
   const [providers, setProviders] = useState<Provider[]>([]);
@@ -47,6 +75,18 @@ const App: React.FC = () => {
   const [isLocationLoading, setIsLocationLoading] = useState<boolean>(false);
   const [locationError, setLocationError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  
+  const [currentLegalDocument, setCurrentLegalDocument] = useState<LegalDocument | null>(null);
+  const [showConfirmationModal, setShowConfirmationModal] = useState(false);
+  const [confirmationModalConfig, setConfirmationModalConfig] = useState({
+      title: '',
+      message: '',
+      confirmText: '',
+      onConfirm: () => {},
+  });
+  
+  const [editingCategory, setEditingCategory] = useState<CareCategory | null>(null);
+
 
   useEffect(() => {
     // Simulate fetching data 
@@ -80,59 +120,150 @@ const App: React.FC = () => {
   };
 
   const handleCategorySelect = (category: CareCategory) => {
+    window.scrollTo(0, 0);
     setSelectedCategory(category);
     setView('providers');
   };
 
   const handleShowAll = (category: CareCategory | 'all') => {
+    window.scrollTo(0, 0);
     setSelectedCategory(category);
   }
   
   const handleSearch = (query: string) => {
+    window.scrollTo(0, 0);
     setSearchQuery(query.trim());
     setSelectedCategory('all');
     setView('providers');
   };
 
   const handleNavigateHome = () => {
+    window.scrollTo(0, 0);
     setView('landing');
     setSelectedProviderId(null);
     setCurrentChatId(null);
   };
   
   const handleShowAllProviders = () => {
+    window.scrollTo(0, 0);
     setSelectedCategory('all');
     setView('providers');
   };
   
   const handleNavigateMap = () => {
+    window.scrollTo(0, 0);
     setView('map');
     setSelectedProviderId(null);
     setCurrentChatId(null);
   };
 
   const handleNavigateFavorites = () => {
+    window.scrollTo(0, 0);
     setView('favorites');
     setSelectedProviderId(null);
     setCurrentChatId(null);
   };
   
   const handleNavigateInbox = () => {
+    window.scrollTo(0, 0);
     setView('inbox');
     setSelectedProviderId(null);
     setCurrentChatId(null);
   }
 
   const handleNavigateOffer = () => {
+    window.scrollTo(0, 0);
     setView('offer');
     setSelectedProviderId(null);
     setCurrentChatId(null);
   };
   
   const handleNavigateMyProfile = () => {
+    window.scrollTo(0, 0);
     setView('myProfile');
     setSelectedProviderId(null);
     setCurrentChatId(null);
+  };
+  
+  const handleNavigateSettings = () => {
+      setPreviousView('myProfile');
+      setView('settings');
+  };
+  
+  const handleBackToProfile = () => {
+      setView('myProfile');
+  };
+  
+  const handleBackToSettings = () => {
+      setView('settings');
+  }
+
+  const handleNavigateMyCaregiverProfile = () => setView('myCaregiverProfile');
+  
+  const handleNavigateEditProfile = (category: CareCategory | null = null) => {
+    setPreviousView(view as 'settings' | 'myCaregiverProfile');
+    setEditingCategory(category);
+    setView('editProfile');
+  };
+
+  const handleBackFromEdit = () => {
+    setView(previousView as 'settings' | 'myCaregiverProfile');
+  }
+
+  const handleNavigateSecuritySettings = () => setView('securitySettings');
+  const handleNavigateNotifications = () => setView('notifications');
+  const handleNavigateLegalInfo = () => {
+    setPreviousView('settings');
+    setView('legalInfo');
+  };
+
+  const handleNavigateLegalDocument = (docId: string) => {
+    const doc = legalDocuments.find(d => d.id === docId);
+    if (doc) {
+      setCurrentLegalDocument(doc);
+      setPreviousView('legalInfo');
+      setView('legalDocument');
+    }
+  };
+
+  const handleBackToLegalInfo = () => {
+    setView('legalInfo');
+    setCurrentLegalDocument(null);
+  }
+
+  const handleShowConfirmation = (config: Omit<typeof confirmationModalConfig, 'onConfirm'> & { onConfirm: () => void }) => {
+    setConfirmationModalConfig(config);
+    setShowConfirmationModal(true);
+  };
+
+  const handleCloseConfirmation = () => {
+    setShowConfirmationModal(false);
+  };
+
+  const handleLogout = () => {
+    handleShowConfirmation({
+        title: 'Cerrar Sesión',
+        message: '¿Estás seguro de que quieres cerrar tu sesión?',
+        confirmText: 'Cerrar Sesión',
+        onConfirm: () => {
+            console.log('Logging out...');
+            handleCloseConfirmation();
+            setView('landing');
+        },
+    });
+  };
+
+  const handleDeleteAccount = () => {
+    handleShowConfirmation({
+        title: 'Eliminar Cuenta',
+        message: 'Esta acción es irreversible. Todos tus datos se borrarán permanentemente. ¿Estás seguro?',
+        confirmText: 'Sí, eliminar mi cuenta',
+        onConfirm: () => {
+            console.log('Deleting account...');
+            handleCloseConfirmation();
+            setView('landing');
+        },
+    });
   };
 
   const handleViewProfile = (providerId: number) => {
@@ -150,7 +281,7 @@ const App: React.FC = () => {
   };
 
   const handleBackToList = () => {
-    setView(previousView);
+    setView(previousView as 'providers' | 'favorites' | 'map');
     setSelectedProviderId(null);
   }
   
@@ -212,6 +343,22 @@ const App: React.FC = () => {
       return chat;
     }));
   };
+  
+  const handleFooterNavigate = (targetView: string) => {
+    window.scrollTo(0, 0);
+    switch (targetView) {
+        case 'providers':
+            handleShowAllProviders();
+            break;
+        case 'offer':
+            handleNavigateOffer();
+            break;
+        default:
+            setView(targetView as View);
+            break;
+    }
+  };
+
 
   const renderContent = () => {
     const providersWithDistance = userLocation
@@ -229,7 +376,8 @@ const App: React.FC = () => {
     if (view === 'map') {
       return <MapView 
         providers={providersWithDistance} 
-        userLocation={userLocation} 
+        userLocation={userLocation}
+        locationError={locationError}
         onViewProfile={handleViewProfile} 
         onBack={handleNavigateHome}
         onLocationUpdate={setUserLocation}
@@ -264,14 +412,45 @@ const App: React.FC = () => {
             return <Chat chat={chat} onBack={handleBackToInbox} onSendMessage={handleSendMessage} />;
         }
     }
+    
+    // Static Pages
+    if (view === 'prices') return <PricesPage onBack={handleNavigateHome} />;
+    if (view === 'security') return <SecurityPage onBack={handleNavigateHome} />;
+    if (view === 'verification') return <VerificationPage onBack={handleNavigateHome} />;
+    if (view === 'help') return <HelpCenterPage onBack={handleNavigateHome} />;
+    if (view === 'about') return <AboutUsPage onBack={handleNavigateHome} />;
+    if (view === 'blog') return <BlogPage onBack={handleNavigateHome} />;
+    if (view === 'contact') return <ContactPage onBack={handleNavigateHome} />;
+
 
     if (view === 'landing') {
       return <LandingPage onCategorySelect={handleCategorySelect} onShowAll={handleShowAllProviders} onNavigateMap={handleNavigateMap} onSearch={handleSearch} />;
     }
     
     if (view === 'myProfile') {
-      return <ProfilePage onNavigateFavorites={handleNavigateFavorites} />;
+      return <ProfilePage onNavigateFavorites={handleNavigateFavorites} onNavigateSettings={handleNavigateSettings} onNavigateMyCaregiverProfile={handleNavigateMyCaregiverProfile} />;
     }
+    
+    // Settings Pages
+    if (view === 'settings') {
+        return <SettingsPage 
+            onBack={handleBackToProfile} 
+            onNavigateEditProfile={() => handleNavigateEditProfile(null)}
+            onNavigateSecurity={handleNavigateSecuritySettings}
+            onNavigateNotifications={handleNavigateNotifications}
+            onNavigateLegal={handleNavigateLegalInfo}
+            onLogout={handleLogout}
+        />;
+    }
+    if (view === 'myCaregiverProfile') return <MyCaregiverProfilePage onBack={handleBackToProfile} onNavigateEditProfile={handleNavigateEditProfile} />;
+    if (view === 'editProfile') return <EditProfilePage onBack={handleBackFromEdit} editingCategory={editingCategory} />;
+    if (view === 'securitySettings') return <SecuritySettingsPage onBack={handleBackToSettings} onDeleteAccount={handleDeleteAccount} />;
+    if (view === 'notifications') return <NotificationsPage onBack={handleBackToSettings} />;
+    if (view === 'legalInfo') return <LegalInfoPage onBack={handleBackToSettings} onNavigateLegalDocument={handleNavigateLegalDocument} documents={legalDocuments} />;
+    if (view === 'legalDocument' && currentLegalDocument) {
+      return <LegalDocumentPage onBack={handleBackToLegalInfo} title={currentLegalDocument.title} content={currentLegalDocument.content} />;
+    }
+
     
     // Providers or Favorites view
     const baseProviders = view === 'favorites'
@@ -351,20 +530,42 @@ const App: React.FC = () => {
     );
   };
 
-  const showBottomNav = view !== 'profile' && view !== 'chat' && view !== 'offer' && !isLocationLoading;
+  const showBottomNav = !['profile', 'chat', 'offer', 'prices', 'security', 'verification', 'help', 'about', 'blog', 'contact', 'settings', 'editProfile', 'securitySettings', 'notifications', 'legalInfo', 'legalDocument', 'myCaregiverProfile'].includes(view) && !isLocationLoading;
+  const showMainLayout = !['profile', 'chat', 'offer', 'map', 'settings', 'editProfile', 'securitySettings', 'notifications', 'legalInfo', 'legalDocument', 'myCaregiverProfile'].includes(view);
+
+  if (!showMainLayout) {
+    return (
+        <>
+            {renderContent()}
+            {showConfirmationModal && (
+                <ConfirmationModal
+                    {...confirmationModalConfig}
+                    onClose={handleCloseConfirmation}
+                />
+            )}
+        </>
+    );
+  }
 
   return (
     <div className="bg-slate-50 text-slate-800 min-h-screen">
       {renderContent()}
+      <Footer onNavigate={handleFooterNavigate} />
       {showBottomNav && (
          <BottomNav 
-            currentView={view} 
+            currentView={view as any} 
             onNavigateHome={handleNavigateHome} 
             onNavigateFavorites={handleNavigateFavorites}
             onNavigateOffer={handleNavigateOffer}
             onNavigateInbox={handleNavigateInbox}
             onNavigateProfile={handleNavigateMyProfile}
             unreadCount={unreadCount}
+          />
+      )}
+      {showConfirmationModal && (
+          <ConfirmationModal
+              {...confirmationModalConfig}
+              onClose={handleCloseConfirmation}
           />
       )}
     </div>

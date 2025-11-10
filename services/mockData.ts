@@ -169,5 +169,89 @@ export const MOCK_PROVIDERS: Provider[] = [
     reviews: [
         { id: 15, authorName: 'Laura J.', authorPhotoUrl: 'https://images.unsplash.com/photo-1548142813-c348350df52b?q=80&w=200', rating: 5, comment: 'Miguel ha sido un descubrimiento. Cuidó de nuestros hijos el sábado y volvieron encantados contando todas las aventuras que habían vivido en el parque. ¡Repetiremos seguro!', date: 'Hace 1 semana' },
     ]
+  },
+  {
+    id: 9,
+    name: 'María Dolores Soler',
+    photoUrl: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=400&auto=format&fit=crop',
+    categories: [CareCategory.ELDERLY],
+    coordinates: { latitude: 37.9838, longitude: -1.1307 },
+    distance: 0,
+    rating: 4.9,
+    reviewsCount: 2,
+    descriptions: [
+        { category: CareCategory.ELDERLY, text: 'Auxiliar de geriatría con más de 15 años de experiencia. Ofrezco un cuidado integral, desde la higiene personal hasta la preparación de dietas específicas y acompañamiento a citas médicas. Mi prioridad es el bienestar y la dignidad de la persona.' }
+    ],
+    services: ['Aseo e Higiene Personal', 'Control de medicación', 'Preparación de comidas', 'Acompañamiento'],
+    hourlyRate: 16,
+    location: 'Centro, Murcia',
+    verifications: ['DNI Verificado', 'Certificado de Geriatría', 'Referencias Comprobadas'],
+    reviews: [
+        { id: 16, authorName: 'Familia Sánchez', authorPhotoUrl: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=200', rating: 5, comment: 'Estamos encantados con Mª Dolores. Es una profesional increíble y trata a mi padre con un cariño excepcional. La recomendamos 100%.', date: 'Hace 2 semanas' },
+        { id: 17, authorName: 'Pedro G.', authorPhotoUrl: 'https://images.unsplash.com/photo-1521119989659-a83eee488004?q=80&w=200', rating: 4.8, comment: 'Muy responsable y atenta. Se encarga de toda la medicación sin un solo fallo.', date: 'Hace 1 mes' }
+    ]
+  },
+  {
+    id: 10,
+    name: 'José Manuel Ruiz',
+    photoUrl: 'https://images.unsplash.com/photo-1568602471122-7832951cc4c5?q=80&w=400&auto=format&fit=crop',
+    categories: [CareCategory.CHILDREN, CareCategory.PETS],
+    coordinates: { latitude: 37.9734, longitude: -1.2185 },
+    distance: 0,
+    rating: 4.6,
+    reviewsCount: 2,
+    descriptions: [
+        { category: CareCategory.CHILDREN, text: 'Monitor de ocio y tiempo libre. Me encanta organizar juegos y talleres para los niños. También puedo ayudar con los deberes.' },
+        { category: CareCategory.PETS, text: 'Gran amante de los perros. Ofrezco paseos largos por la zona del río y mucho juego para que gasten energía.' }
+    ],
+    services: ['Canguro', 'Ayuda con deberes', 'Paseo de Perros', 'Juegos al aire libre'],
+    hourlyRate: 11,
+    location: 'Alcantarilla, Murcia',
+    verifications: ['DNI Verificado', 'Título de Monitor de Ocio'],
+    reviews: [
+        { id: 18, authorName: 'Lucía F.', authorPhotoUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200', rating: 5, comment: 'Mis hijos se lo pasan genial con José Manuel. Siempre tiene juegos nuevos preparados. Y mi perro vuelve agotado y feliz de sus paseos.', date: 'Hace 3 semanas' },
+        { id: 19, authorName: 'Antonio M.', authorPhotoUrl: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?q=80&w=200', rating: 4, comment: 'Buen cuidador, puntual y responsable.', date: 'Hace 2 meses' }
+    ]
+  },
+  {
+    id: 11,
+    name: 'Carmen Navarro',
+    photoUrl: 'https://images.unsplash.com/photo-1610216705422-caa3fcb6d158?q=80&w=400&auto=format&fit=crop',
+    categories: [CareCategory.PETS],
+    coordinates: { latitude: 37.9790, longitude: -1.1332 },
+    distance: 0,
+    rating: 5.0,
+    reviewsCount: 1,
+    descriptions: [
+        { category: CareCategory.PETS, text: 'Voluntaria en protectoras de animales. Ofrezco cuidado a domicilio para gatos y otros animales pequeños. Experiencia con medicación oral.' }
+    ],
+    services: ['Cuidado de gatos a domicilio', 'Alimentación y limpieza', 'Administración de medicación'],
+    hourlyRate: 12,
+    location: 'El Carmen, Murcia',
+    verifications: ['DNI Verificado', 'Referencias de Protectora'],
+    reviews: [
+        { id: 20, authorName: 'Elena V.', authorPhotoUrl: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=200', rating: 5, comment: 'Carmen es un amor con los animales. Cuidó de mi gata como si fuera suya, mandándome fotos todos los días. ¡Totalmente de fiar!', date: 'Hace 1 semana' }
+    ]
+  },
+  {
+    id: 12,
+    name: 'Francisco López',
+    photoUrl: 'https://images.unsplash.com/photo-1615109398623-88346a601842?q=80&w=400&auto=format&fit=crop',
+    categories: [CareCategory.ELDERLY, CareCategory.CHILDREN],
+    coordinates: { latitude: 37.9750, longitude: -1.2200 },
+    distance: 0,
+    rating: 4.7,
+    reviewsCount: 1,
+    descriptions: [
+        { category: CareCategory.ELDERLY, text: 'Ofrezco servicio de acompañamiento y recados para personas mayores. Soy una persona paciente y un buen conversador.' },
+        { category: CareCategory.CHILDREN, text: 'Puedo recoger a los niños del colegio y llevarlos a actividades extraescolares. Tengo vehículo propio.' }
+    ],
+    services: ['Acompañamiento', 'Recados y compras', 'Recogida del colegio', 'Traslados'],
+    hourlyRate: 13,
+    location: 'Alcantarilla, Murcia',
+    verifications: ['DNI Verificado', 'Carnet de Conducir'],
+    reviews: [
+        { id: 21, authorName: 'Isabel R.', authorPhotoUrl: 'https://images.unsplash.com/photo-1554151228-14d9def656e4?q=80&w=200', rating: 5, comment: 'Puntualidad y amabilidad. Francisco recoge a mi hijo del colegio y estamos muy tranquilos. Un gran servicio.', date: 'Hace 1 mes' }
+    ]
   }
 ];

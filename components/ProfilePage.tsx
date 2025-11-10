@@ -8,6 +8,8 @@ import ChevronRightIcon from './icons/ChevronRightIcon';
 
 interface ProfilePageProps {
   onNavigateFavorites: () => void;
+  onNavigateSettings: () => void;
+  onNavigateMyCaregiverProfile: () => void;
 }
 
 interface ListItemProps {
@@ -29,7 +31,7 @@ const ListItem: React.FC<ListItemProps> = ({ icon, label, onClick }) => (
   </li>
 );
 
-const ProfilePage: React.FC<ProfilePageProps> = ({ onNavigateFavorites }) => {
+const ProfilePage: React.FC<ProfilePageProps> = ({ onNavigateFavorites, onNavigateSettings, onNavigateMyCaregiverProfile }) => {
   return (
     <div className="bg-slate-50 min-h-screen">
         <main className="container mx-auto px-4 py-6 pb-28">
@@ -60,12 +62,12 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onNavigateFavorites }) => {
                     <ListItem
                         icon={<UserCircleIcon className="w-6 h-6" />}
                         label="Mi Perfil de Cuidador"
-                        onClick={() => alert('Navegando a tu perfil de cuidador...')}
+                        onClick={onNavigateMyCaregiverProfile}
                     />
                      <ListItem
                         icon={<Cog6ToothIcon className="w-6 h-6" />}
                         label="Configuración"
-                        onClick={() => alert('Navegando a configuración...')}
+                        onClick={onNavigateSettings}
                     />
                 </ul>
             </div>

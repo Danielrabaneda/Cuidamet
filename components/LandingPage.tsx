@@ -9,6 +9,10 @@ import SparklesIcon from './icons/SparklesIcon';
 import QueueListIcon from './icons/QueueListIcon';
 import MapIcon from './icons/MapIcon';
 import ShareIcon from './icons/ShareIcon';
+import ChatBubbleLeftRightIcon from './icons/ChatBubbleLeftRightIcon';
+import CheckCircleIcon from './icons/CheckCircleIcon';
+import StarIcon from './icons/StarIcon';
+import ClockIcon from './icons/ClockIcon';
 
 interface LandingPageProps {
   onCategorySelect: (category: CareCategory) => void;
@@ -24,7 +28,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onCategorySelect, onShowAll, 
     {
       id: CareCategory.ELDERLY,
       name: 'Cuidado de Mayores',
-      imageUrl: 'https://images.unsplash.com/photo-1594594210239-95245a6cbf49?q=80&w=800&auto=format&fit=crop',
+      imageUrl: 'https://images.unsplash.com/photo-1605294625341-35b85a3cb365?q=80&w=800&auto=format&fit=crop',
     },
     {
       id: CareCategory.CHILDREN,
@@ -47,13 +51,36 @@ const LandingPage: React.FC<LandingPageProps> = ({ onCategorySelect, onShowAll, 
     {
       icon: LocationPinIcon,
       title: 'Cerca de Ti',
-      description: 'Usa tu ubicación para encontrar a los mejores cuidadores en tu propio barrio, sin complicaciones.',
+      description: 'Usa tu ubicación para encontrar a los mejores cuidadores en tu propio barrio.',
     },
     {
       icon: SparklesIcon,
       title: 'Fácil y Rápido',
       description: 'Contacta y contrata en muy pocos pasos de forma segura e intuitiva desde nuestra aplicación.',
     },
+  ];
+
+  const securityFeatures = [
+    { 
+      icon: ShieldCheckIcon, 
+      title: 'Verificación estricta', 
+      description: 'DNI, certificados y antecedentes verificados' 
+    },
+    { 
+      icon: StarIcon, 
+      title: 'Valoraciones reales', 
+      description: 'Opiniones honestas de otros usuarios para ayudarte a decidir.' 
+    },
+    { 
+      icon: LocationPinIcon, 
+      title: 'Geolocalización', 
+      description: 'Encuentra profesionales en tu zona al instante' 
+    },
+    { 
+      icon: ClockIcon, 
+      title: 'Disponibilidad 24/7', 
+      description: 'Modo urgente para necesidades inmediatas' 
+    }
   ];
 
   const handleFormSubmit = (e: React.FormEvent) => {
@@ -145,7 +172,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onCategorySelect, onShowAll, 
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Nombre, servicio, ubicación..."
-                className="w-full bg-white border border-slate-300 rounded-full py-4 pl-12 pr-32 text-base focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
+                className="w-full bg-white border border-slate-300 rounded-full py-4 pl-12 pr-32 text-base focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition text-slate-800"
               />
                <button type="submit" className="absolute inset-y-0 right-0 flex items-center bg-teal-500 text-white font-semibold px-6 rounded-full m-1.5 hover:bg-teal-600 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">
                 Buscar
@@ -165,15 +192,55 @@ const LandingPage: React.FC<LandingPageProps> = ({ onCategorySelect, onShowAll, 
                 className="relative aspect-[3/4] rounded-xl overflow-hidden group shadow-lg hover:shadow-2xl transition-shadow duration-300 transform hover:-translate-y-1"
               >
                 <img src={cat.imageUrl} alt={cat.name} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent group-hover:from-black/70 transition-colors"></div>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent transition-colors duration-300 group-hover:from-black/70"></div>
                 <div className="absolute inset-0 flex items-end p-2 md:p-3">
-                  <h3 className="text-white text-sm sm:text-base font-bold leading-tight">{cat.name}</h3>
+                  <h3 className="text-white text-sm sm:text-base font-bold leading-tight drop-shadow-md">{cat.name}</h3>
                 </div>
               </button>
             ))}
           </div>
 
-          <div className="mt-8 max-w-4xl mx-auto space-y-4">
+          {/* How it works Section */}
+          <section className="mt-16 text-center">
+            <h2 className="text-3xl font-bold text-slate-800 mb-3">¿Cómo funciona Cuidamet?</h2>
+            <p className="max-w-xl mx-auto text-slate-600 mb-12">
+              Tres pasos simples para encontrar tu cuidador ideal
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-4xl mx-auto">
+              {/* Step 1 */}
+              <div className="flex flex-col items-center">
+                <div className="bg-teal-100 rounded-full p-5 mb-4 inline-block">
+                  <SearchIcon className="w-10 h-10 text-teal-500" />
+                </div>
+                <h3 className="text-xl font-bold text-slate-800 mb-2">1. Busca</h3>
+                <p className="text-slate-500 leading-relaxed">
+                  Filtra por ubicación, disponibilidad, tipo de servicio y valoraciones. Encuentra cuidadores cerca de ti.
+                </p>
+              </div>
+              {/* Step 2 */}
+              <div className="flex flex-col items-center">
+                <div className="bg-teal-100 rounded-full p-5 mb-4 inline-block">
+                  <ChatBubbleLeftRightIcon className="w-10 h-10 text-teal-500" />
+                </div>
+                <h3 className="text-xl font-bold text-slate-800 mb-2">2. Conecta</h3>
+                <p className="text-slate-500 leading-relaxed">
+                  Chatea directamente y programa videollamadas. Conoce a los candidatos antes de decidir.
+                </p>
+              </div>
+              {/* Step 3 */}
+              <div className="flex flex-col items-center">
+                <div className="bg-teal-100 rounded-full p-5 mb-4 inline-block">
+                  <CheckCircleIcon className="w-10 h-10 text-teal-500" />
+                </div>
+                <h3 className="text-xl font-bold text-slate-800 mb-2">3. Contrata</h3>
+                <p className="text-slate-500 leading-relaxed">
+                  Reserva con pago seguro incluido. Sistema de valoraciones para garantizar calidad.
+                </p>
+              </div>
+            </div>
+          </section>
+
+          <div className="mt-16 max-w-4xl mx-auto space-y-4">
             <button
               onClick={onShowAll}
               className="w-full flex items-center justify-center bg-gradient-to-r from-teal-500 to-green-500 text-white px-6 py-4 rounded-xl font-semibold transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 shadow-lg hover:shadow-xl hover:shadow-teal-500/30 transform hover:-translate-y-0.5"
@@ -203,14 +270,14 @@ const LandingPage: React.FC<LandingPageProps> = ({ onCategorySelect, onShowAll, 
             <p className="max-w-2xl mx-auto text-slate-600 mb-12">
               Te conectamos con los mejores profesionales para el cuidado de los que más quieres.
             </p>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
+            <div className="grid grid-cols-3 gap-4 md:gap-6">
               {features.map((feature, index) => (
                 <div key={index} className="flex flex-col items-center">
-                  <div className="bg-teal-100/70 rounded-full p-4 mb-4">
-                    <feature.icon className="w-8 h-8 text-teal-500" />
+                  <div className="bg-teal-100/70 rounded-full p-3 mb-2">
+                    <feature.icon className="w-6 h-6 text-teal-500" />
                   </div>
-                  <h3 className="text-lg font-semibold text-slate-800 mb-2">{feature.title}</h3>
-                  <p className="text-slate-500 text-sm leading-relaxed">{feature.description}</p>
+                  <h3 className="text-sm font-semibold text-slate-800 mb-1">{feature.title}</h3>
+                  <p className="text-slate-500 text-xs leading-snug">{feature.description}</p>
                 </div>
               ))}
             </div>
@@ -230,6 +297,23 @@ const LandingPage: React.FC<LandingPageProps> = ({ onCategorySelect, onShowAll, 
             </button>
           </section>
 
+          {/* Security Priority Section */}
+          <section className="mt-20 py-16 bg-teal-50/70 rounded-3xl">
+            <div className="container mx-auto px-4 text-center">
+              <h2 className="text-3xl font-bold text-slate-800 mb-12">Tu seguridad es nuestra prioridad</h2>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
+                {securityFeatures.map((feature, index) => (
+                  <div key={index} className="bg-white/80 backdrop-blur-sm p-4 rounded-xl shadow-lg border border-white/50 text-center flex flex-col items-center transform hover:-translate-y-1 transition-transform duration-300">
+                    <div className="text-teal-500 mb-3">
+                      <feature.icon className="w-8 h-8" />
+                    </div>
+                    <h3 className="text-sm font-semibold text-slate-800 mb-1">{feature.title}</h3>
+                    <p className="text-slate-500 text-xs leading-snug">{feature.description}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
         </div>
       </main>
     </div>

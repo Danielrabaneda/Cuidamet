@@ -1,46 +1,45 @@
-
 import React from 'react';
 
-const Footer: React.FC = () => {
+interface FooterProps {
+  onNavigate: (view: string) => void;
+}
+
+const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
   return (
-    <footer className="bg-white border-t border-slate-200">
-      <div className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center md:text-left">
+    <footer className="bg-slate-100 border-t border-slate-200">
+      <div className="container mx-auto px-6 py-10 pb-28 sm:pb-10">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-8">
+          
           <div>
-            <h3 className="font-semibold text-slate-800 mb-4">Cuidamet</h3>
-            <ul className="space-y-2">
-              <li><a href="#" className="text-slate-500 hover:text-teal-500">About Us</a></li>
-              <li><a href="#" className="text-slate-500 hover:text-teal-500">Careers</a></li>
-              <li><a href="#" className="text-slate-500 hover:text-teal-500">Press</a></li>
+            <h3 className="font-bold text-slate-800 mb-4 text-base">Para familias</h3>
+            <ul className="space-y-3">
+              <li><button onClick={() => onNavigate('providers')} className="text-slate-600 hover:text-teal-500 transition-colors text-sm">Buscar cuidadores</button></li>
+              <li><button onClick={() => onNavigate('prices')} className="text-slate-600 hover:text-teal-500 transition-colors text-sm">Precios</button></li>
+              <li><button onClick={() => onNavigate('security')} className="text-slate-600 hover:text-teal-500 transition-colors text-sm">Seguridad</button></li>
             </ul>
           </div>
+          
           <div>
-            <h3 className="font-semibold text-slate-800 mb-4">Support</h3>
-            <ul className="space-y-2">
-              <li><a href="#" className="text-slate-500 hover:text-teal-500">Help Center</a></li>
-              <li><a href="#" className="text-slate-500 hover:text-teal-500">Trust & Safety</a></li>
-              <li><a href="#" className="text-slate-500 hover:text-teal-500">Contact Us</a></li>
+            <h3 className="font-bold text-slate-800 mb-4 text-base">Para cuidadores</h3>
+            <ul className="space-y-3">
+              <li><button onClick={() => onNavigate('offer')} className="text-slate-600 hover:text-teal-500 transition-colors text-sm">Ofrecer servicios</button></li>
+              <li><button onClick={() => onNavigate('verification')} className="text-slate-600 hover:text-teal-500 transition-colors text-sm">Verificación</button></li>
+              <li><button onClick={() => onNavigate('help')} className="text-slate-600 hover:text-teal-500 transition-colors text-sm">Centro de ayuda</button></li>
             </ul>
           </div>
-          <div>
-            <h3 className="font-semibold text-slate-800 mb-4">Legal</h3>
-            <ul className="space-y-2">
-              <li><a href="#" className="text-slate-500 hover:text-teal-500">Terms of Service</a></li>
-              <li><a href="#" className="text-slate-500 hover:text-teal-500">Privacy Policy</a></li>
+          
+          <div className="col-span-2 md:col-span-1">
+            <h3 className="font-bold text-slate-800 mb-4 text-base">Empresa</h3>
+            <ul className="space-y-3">
+              <li><button onClick={() => onNavigate('about')} className="text-slate-600 hover:text-teal-500 transition-colors text-sm">Sobre nosotros</button></li>
+              <li><button onClick={() => onNavigate('blog')} className="text-slate-600 hover:text-teal-500 transition-colors text-sm">Blog</button></li>
+              <li><button onClick={() => onNavigate('contact')} className="text-slate-600 hover:text-teal-500 transition-colors text-sm">Contacto</button></li>
             </ul>
           </div>
-          <div>
-            <h3 className="font-semibold text-slate-800 mb-4">Follow Us</h3>
-             <div className="flex justify-center md:justify-start space-x-4">
-               {/* Placeholder for social icons */}
-              <a href="#" className="text-slate-500 hover:text-teal-500">FB</a>
-              <a href="#" className="text-slate-500 hover:text-teal-500">IG</a>
-              <a href="#" className="text-slate-500 hover:text-teal-500">TW</a>
-            </div>
-          </div>
+
         </div>
-        <div className="text-center text-slate-500 border-t border-slate-200 mt-8 pt-6">
-          <p>&copy; {new Date().getFullYear()} Cuidamet. All rights reserved.</p>
+        <div className="text-center text-xs text-slate-500 border-t border-slate-200 mt-8 pt-6">
+          <p>&copy; {new Date().getFullYear()} Cuidamet. Todos los derechos reservados.</p>
         </div>
       </div>
     </footer>

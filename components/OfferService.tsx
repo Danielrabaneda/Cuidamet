@@ -1,18 +1,15 @@
-
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { CareCategory } from '../types';
-import HeartHandshakeIcon from './icons/HeartHandshakeIcon';
-import ClipboardDocumentListIcon from './icons/ClipboardDocumentListIcon';
-import StarIcon from './icons/StarIcon';
-import CurrencyEuroIcon from './icons/CurrencyEuroIcon';
+import PageHeader from './PageHeader';
 import CameraIcon from './icons/CameraIcon';
-import ShieldCheckIcon from './icons/ShieldCheckIcon';
-import UserIcon from './icons/UserIcon';
-import PhoneIcon from './icons/PhoneIcon';
-import IdentificationIcon from './icons/IdentificationIcon';
-import MailIcon from './icons/MailIcon';
+import PencilIcon from './icons/PencilIcon';
 import MapPinIcon from './icons/MapPinIcon';
-
+import CurrencyEuroIcon from './icons/CurrencyEuroIcon';
+import StarIcon from './icons/StarIcon';
+import IdentificationIcon from './icons/IdentificationIcon';
+import UserCircleIcon from './icons/UserCircleIcon';
+import CheckCircleIcon from './icons/CheckCircleIcon';
+import PhotoUploadModal from './PhotoUploadModal';
 
 interface OfferServiceProps {
   onClose: () => void;
@@ -30,423 +27,385 @@ const experienceLevels = [
   { id: 'expert', name: 'Experto (+5 años)' },
 ];
 
+const serviceDetails = {
+  [CareCategory.ELDERLY]: {
+    offers: [
+      'Acompañamiento diario o por horas',
+      'Asistencia en movilidad y actividades básicas',
+      'Administración de medicamentos',
+      'Control de citas médicas',
+      'Compañía emocional y conversación',
+      'Tareas ligeras del hogar',
+    ],
+    skills: [
+      'Experiencia con Alzheimer o demencia',
+      'Experiencia con movilidad reducida',
+      'Cursos en geriatría o primeros auxilios',
+      'Capacidad de convivencia (interno/a)',
+    ],
+  },
+  [CareCategory.CHILDREN]: {
+    offers: [
+      'Canguro por horas (diurno/nocturno)',
+      'Ayuda con los deberes y refuerzo escolar',
+      'Recogida del colegio y extraescolares',
+      'Preparación de comidas y meriendas',
+      'Juegos creativos y actividades lúdicas',
+      'Cuidado de bebés y recién nacidos',
+    ],
+    skills: [
+      'Experiencia con necesidades especiales',
+      'Formación en pedagogía o magisterio',
+      'Certificado de primeros auxilios pediátricos',
+      'Bilingüe o conocimientos de idiomas',
+      'Carnet de conducir y vehículo propio',
+    ],
+  },
+  [CareCategory.PETS]: {
+    offers: [
+      'Paseos de perros (individuales/grupales)',
+      'Cuidado a domicilio (visitas)',
+      'Alojamiento en casa del cuidador',
+      'Administración de medicamentos',
+      'Cuidado de cachorros o animales senior',
+      'Adiestramiento básico',
+    ],
+    skills: [
+      'Experiencia con razas específicas o PPP',
+      'Formación veterinaria o auxiliar',
+      'Hogar con jardín o espacios al aire libre',
+      'Admite convivencia con otras mascotas',
+      'Manejo de animales con ansiedad o miedos',
+    ],
+  },
+};
+
+const categoryStyles = {
+    [CareCategory.ELDERLY]: {
+        label: 'bg-teal-500 border-teal-600 text-white',
+        labelHover: 'hover:bg-teal-600',
+        checkbox: 'text-teal-700 focus:ring-teal-400 border-teal-400',
+        span: 'font-semibold',
+    },
+    [CareCategory.CHILDREN]: {
+        label: 'bg-amber-500 border-amber-600 text-white',
+        labelHover: 'hover:bg-amber-600',
+        checkbox: 'text-amber-700 focus:ring-amber-400 border-amber-400',
+        span: 'font-semibold',
+    },
+    [CareCategory.PETS]: {
+        label: 'bg-green-500 border-green-600 text-white',
+        labelHover: 'hover:bg-green-600',
+        checkbox: 'text-green-700 focus:ring-green-400 border-green-400',
+        span: 'font-semibold',
+    }
+};
+
+const defaultStyles = {
+    label: 'bg-white border-slate-300',
+    labelHover: 'hover:bg-slate-100',
+    checkbox: 'text-teal-500 focus:ring-teal-500',
+    span: 'font-medium text-slate-700',
+};
+
+
 const OfferService: React.FC<OfferServiceProps> = ({ onClose }) => {
-  const [step, setStep] = useState(1);
-  
-  // Step 1 State
-  const [descriptions, setDescriptions] = useState<Record<string, string>>({});
-  const [categories, setCategories] = useState<CareCategory[]>([]);
-  const [experience, setExperience] = useState('');
-  const [hourlyRate, setHourlyRate] = useState('');
-  
-  // Step 2 State
-  const [photoDataUrl, setPhotoDataUrl] = useState<string | null>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const streamRef = useRef<MediaStream | null>(null);
-  
-  // Step 3 State
-  const [fullName, setFullName] = useState('');
-  const [phone, setPhone] = useState('');
-  const [email, setEmail] = useState('');
-  const [idDocument, setIdDocument] = useState<File | null>(null);
-
-  // Step 4 State
-  const [locationStatus, setLocationStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
-  const [manualLocation, setManualLocation] = useState('');
-  const [showManualInput, setShowManualInput] = useState(false);
-
-  const MAX_CHARS = 250;
-
-  const isFormComplete = 
-    categories.length > 0 &&
-    categories.every(cat => descriptions[cat]?.trim().length > 0) &&
-    experience &&
-    hourlyRate &&
-    parseFloat(hourlyRate) > 0;
-
-  const isVerificationComplete = fullName.trim().length > 0 && phone.trim().length > 0;
-  const isLocationComplete = locationStatus === 'success' || manualLocation.trim().length > 0;
-
-  useEffect(() => {
-    if (step === 2 && !photoDataUrl) {
-      startCamera();
-    } else {
-      stopCamera();
-    }
-    
-    return () => {
-      stopCamera();
-    };
-  }, [step, photoDataUrl]);
-
-  const handleCategoryChange = (category: CareCategory) => {
-    setCategories(prev => {
-      const newCategories = prev.includes(category) 
-          ? prev.filter(c => c !== category) 
-          : [...prev, category];
-
-      if (!newCategories.includes(category)) {
-        setDescriptions(currentDescs => {
-          const newDescs = { ...currentDescs };
-          delete newDescs[category];
-          return newDescs;
-        });
-      }
-      
-      return newCategories;
+    const [profile, setProfile] = useState({
+        name: '',
+        photoUrl: '',
+        location: '',
+        categories: [] as CareCategory[],
+        hourlyRate: '',
+        descriptions: {} as Record<CareCategory, string>,
+        detailedServices: {} as Record<CareCategory, { offers: string[]; skills: string[] }>,
+        experience: '',
     });
-  };
-  
-  const handleDescriptionChange = (category: CareCategory, text: string) => {
-    setDescriptions(prev => ({
-      ...prev,
-      [category]: text,
-    }));
-  };
+    const [isSaving, setIsSaving] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const [isPhotoModalOpen, setIsPhotoModalOpen] = useState(false);
+    const [locationStatus, setLocationStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
 
-  const startCamera = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
-      streamRef.current = stream;
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-      }
-    } catch (err) {
-      console.error("Error accessing camera: ", err);
-      alert("No se pudo acceder a la cámara. Por favor, comprueba los permisos en tu navegador.");
-    }
-  };
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+        const { name, value } = e.target;
+        setProfile(prev => ({ ...prev, [name]: value }));
+    };
 
-  const stopCamera = () => {
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop());
-      streamRef.current = null;
-    }
-  };
+    const handleDescriptionChange = (category: CareCategory, value: string) => {
+        setProfile(prev => ({
+        ...prev,
+        descriptions: { ...prev.descriptions, [category]: value },
+        }));
+    };
 
-  const handleTakePhoto = () => {
-    if (videoRef.current && canvasRef.current) {
-      const video = videoRef.current;
-      const canvas = canvasRef.current;
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      const context = canvas.getContext('2d');
-      if (context) {
-        context.translate(video.videoWidth, 0);
-        context.scale(-1, 1);
-        context.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
-      }
-      const dataUrl = canvas.toDataURL('image/jpeg');
-      setPhotoDataUrl(dataUrl);
-      stopCamera();
-    }
-  };
+    const handleCategoryToggle = (category: CareCategory) => {
+        setProfile(prev => {
+            const newCategories = prev.categories.includes(category)
+                ? prev.categories.filter(c => c !== category)
+                : [...prev.categories, category];
+            return { ...prev, categories: newCategories };
+        });
+    };
+    
+    const handleDetailedServiceToggle = (category: CareCategory, type: 'offers' | 'skills', service: string) => {
+        setProfile(prev => {
+            const currentCategoryServices = prev.detailedServices[category] || { offers: [], skills: [] };
+            const servicesForType = currentCategoryServices[type];
+            
+            const newServicesForType = servicesForType.includes(service)
+                ? servicesForType.filter(s => s !== service)
+                : [...servicesForType, service];
 
-  const handleRetakePhoto = () => {
-    setPhotoDataUrl(null);
-  };
-  
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setIdDocument(e.target.files[0]);
-    }
-  };
-  
-  const handleGetCurrentLocation = () => {
-    setLocationStatus('loading');
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        console.log("Location obtained:", position);
-        setLocationStatus('success');
-      },
-      (error) => {
-        console.error("Error getting location:", error);
-        setLocationStatus('error');
-        alert('No se pudo obtener la ubicación. Por favor, habilita los permisos o introduce la dirección manualmente.');
-      }
-    );
-  };
+            return {
+                ...prev,
+                detailedServices: {
+                    ...prev.detailedServices,
+                    [category]: {
+                        ...currentCategoryServices,
+                        [type]: newServicesForType,
+                    }
+                }
+            };
+        });
+    };
 
-  const renderFormStep = () => (
-    <>
-      <div className="text-center mb-8">
-        <HeartHandshakeIcon className="h-24 w-24 mx-auto text-teal-500" />
-      </div>
-      <h1 className="text-3xl font-bold text-slate-800 mb-2">¡Crea tu perfil de cuidador!</h1>
-      <p className="text-slate-600 mb-8">Completa estos primeros pasos y te ayudaremos a crear un perfil atractivo que inspire confianza.</p>
-      <div className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-slate-700 mb-2">Tipos de Servicio (puedes elegir varios)</label>
-          <div className="space-y-2">
-            {serviceCategories.map(cat => (
-              <label key={cat.id} className="flex items-center w-full bg-white p-3 border border-slate-300 rounded-xl cursor-pointer hover:bg-slate-50 transition-colors">
-                <input
-                  type="checkbox"
-                  checked={categories.includes(cat.id)}
-                  onChange={() => handleCategoryChange(cat.id)}
-                  className="h-5 w-5 rounded border-slate-300 text-teal-500 focus:ring-teal-500"
-                />
-                <span className="ml-3 text-slate-700">{cat.label}</span>
-              </label>
-            ))}
-          </div>
-        </div>
+    const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                if (event.target?.result) {
+                    setProfile(prev => ({ ...prev, photoUrl: event.target!.result as string }));
+                }
+            };
+            reader.readAsDataURL(e.target.files[0]);
+        }
+        setIsPhotoModalOpen(false);
+    };
+    
+    const handleTakePhoto = () => {
+        if (fileInputRef.current) {
+            fileInputRef.current.setAttribute('capture', 'user');
+            fileInputRef.current.click();
+        }
+    };
 
-        {categories.length > 0 && (
-          <div className="space-y-4 pt-2 animate-fade-in">
-            <p className="text-sm font-medium text-slate-700">Ahora, describe cada servicio que ofreces:</p>
-            {categories.sort().map(category => {
-              const catInfo = serviceCategories.find(c => c.id === category);
-              return (
-                <div key={category}>
-                  <label htmlFor={`description-${category}`} className="block text-sm font-medium text-teal-600 mb-1">
-                    {catInfo?.label}
-                  </label>
-                  <div className="relative">
-                    <textarea
-                      id={`description-${category}`}
-                      value={descriptions[category] || ''}
-                      onChange={(e) => handleDescriptionChange(category, e.target.value)}
-                      maxLength={MAX_CHARS}
-                      placeholder={`Describe tu experiencia con ${catInfo?.label.toLowerCase()}...`}
-                      className="w-full h-28 p-3 border border-slate-300 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-teal-500 transition"
-                      aria-label={`Descripción para ${catInfo?.label}`}
-                    />
-                    <div className="absolute bottom-3 right-4 text-sm text-slate-400">
-                      {(descriptions[category] || '').length}/{MAX_CHARS}
+    const handleChooseFromGallery = () => {
+        if (fileInputRef.current) {
+            fileInputRef.current.removeAttribute('capture');
+            fileInputRef.current.click();
+        }
+    };
+
+    const handleGetCurrentLocation = () => {
+        setLocationStatus('loading');
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            setLocationStatus('success');
+            setProfile(prev => ({ ...prev, location: 'Ubicación actual detectada' }));
+          },
+          (error) => {
+            setLocationStatus('error');
+            alert('No se pudo obtener la ubicación. Por favor, habilita los permisos o introduce la dirección manualmente.');
+          }
+        );
+    };
+
+    const handleSave = () => {
+        setIsSaving(true);
+        console.log('Creating profile:', profile);
+        setTimeout(() => {
+            setIsSaving(false);
+            alert('¡Perfil creado con éxito! Ya eres parte de Cuidamet.');
+            onClose();
+        }, 1500);
+    };
+
+    const isFormValid = profile.name && profile.photoUrl && profile.location && profile.categories.length > 0 && profile.hourlyRate && profile.experience;
+
+    return (
+        <div className="bg-slate-50 min-h-screen">
+            <PageHeader title="Crea tu perfil de cuidador" onBack={onClose} />
+            <main className="container mx-auto px-4 py-6 pb-28">
+
+                <section className="flex flex-col items-center mb-8 text-center">
+                    <div className="relative group">
+                        {profile.photoUrl ? (
+                            <img src={profile.photoUrl} alt="Tu foto" className="w-28 h-28 rounded-full object-cover border-4 border-white shadow-lg" />
+                        ) : (
+                            <div className="w-28 h-28 rounded-full bg-slate-200 border-4 border-white shadow-lg flex items-center justify-center">
+                                <UserCircleIcon className="w-20 h-20 text-slate-400" />
+                            </div>
+                        )}
+                        <button onClick={() => setIsPhotoModalOpen(true)} className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 flex items-center justify-center rounded-full transition-all duration-300 cursor-pointer">
+                            <CameraIcon className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </button>
+                        <input type="file" ref={fileInputRef} onChange={handlePhotoChange} className="hidden" accept="image/*" />
                     </div>
-                  </div>
+                    <h2 className="text-xl font-bold text-slate-800 mt-4">¡Bienvenido/a!</h2>
+                    <p className="text-slate-500 mt-1 max-w-sm">Completa tu perfil para que las familias puedan encontrarte y conocerte mejor.</p>
+                </section>
+
+                <div className="space-y-6">
+                    <section className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-4">
+                        <h3 className="font-bold text-lg text-slate-800">Información Personal</h3>
+                        <div>
+                            <label htmlFor="name" className="block text-sm font-medium text-slate-700 mb-1">Tu nombre público</label>
+                            <div className="relative">
+                                <input id="name" name="name" type="text" value={profile.name} onChange={handleInputChange} placeholder="Ej: Sofía López" className="w-full bg-slate-50 p-3 pl-4 pr-10 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500" />
+                                <PencilIcon className="absolute top-1/2 right-3 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                            </div>
+                        </div>
+                    </section>
+
+                    <section className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-4">
+                        <h3 className="font-bold text-lg text-slate-800">Ubicación</h3>
+                        <div>
+                            <label htmlFor="location" className="block text-sm font-medium text-slate-700 mb-1">Indica tu barrio o ciudad</label>
+                            <button onClick={handleGetCurrentLocation} className="w-full text-sm text-teal-600 font-semibold p-2 mb-2 rounded-lg hover:bg-teal-50 transition-colors">
+                                Usar mi ubicación actual
+                            </button>
+                            <div className="relative">
+                                <input id="location" name="location" type="text" value={profile.location} onChange={handleInputChange} placeholder="Ej: Arganzuela, Madrid" className="w-full bg-slate-50 p-3 pl-4 pr-10 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500" />
+                                <MapPinIcon className="absolute top-1/2 right-3 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                            </div>
+                            {locationStatus === 'success' && <p className="text-sm text-green-600 mt-2">¡Ubicación detectada!</p>}
+                        </div>
+                    </section>
+                    
+                    <section className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-4">
+                        <h3 className="font-bold text-lg text-slate-800">Mis Servicios</h3>
+                        <div>
+                            <label className="block text-sm font-medium text-slate-700 mb-2">Marca las categorías en las que ofreces servicios</label>
+                            <div className="space-y-3">
+                                {serviceCategories.map(cat => {
+                                    const isChecked = profile.categories.includes(cat.id);
+                                    const styles = isChecked ? categoryStyles[cat.id] : defaultStyles;
+                                    return (
+                                    <div key={cat.id} className="transition-all duration-300">
+                                        <label className={`flex items-center w-full p-3 border rounded-xl cursor-pointer transition-colors ${styles.label} ${styles.labelHover}`}>
+                                            <input 
+                                                type="checkbox" 
+                                                checked={isChecked} 
+                                                onChange={() => handleCategoryToggle(cat.id)} 
+                                                className={`h-5 w-5 rounded border-slate-300 ${styles.checkbox}`}
+                                            />
+                                            <span className={`ml-3 ${styles.span}`}>{cat.label}</span>
+                                        </label>
+                                        
+                                        {isChecked && (
+                                            <div className="p-4 mt-[-1px] bg-white rounded-b-xl border-x border-b border-slate-200 animate-fade-in space-y-4">
+                                                <div>
+                                                    <label htmlFor={`description-${cat.id}`} className="block text-sm font-medium text-teal-600 mb-1">
+                                                        Describe tu experiencia en "{cat.label}"
+                                                    </label>
+                                                    <textarea 
+                                                        id={`description-${cat.id}`} 
+                                                        value={profile.descriptions[cat.id] || ''} 
+                                                        onChange={(e) => handleDescriptionChange(cat.id, e.target.value)} 
+                                                        maxLength={250} 
+                                                        className="w-full h-24 p-3 bg-slate-50 border border-slate-300 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-teal-500"
+                                                        placeholder="Ej: Llevo 5 años cuidando niños, soy paciente y me encantan los juegos..."
+                                                    />
+                                                </div>
+
+                                                <div>
+                                                    <h4 className="font-semibold text-slate-700 mb-2">¿Qué ofreces?</h4>
+                                                    <div className="space-y-2">
+                                                        {serviceDetails[cat.id as CareCategory].offers.map(offer => (
+                                                            <label key={offer} className="flex items-center text-sm text-slate-600">
+                                                                <input 
+                                                                    type="checkbox" 
+                                                                    checked={profile.detailedServices[cat.id as CareCategory]?.offers.includes(offer) || false}
+                                                                    onChange={() => handleDetailedServiceToggle(cat.id as CareCategory, 'offers', offer)}
+                                                                    className={`h-4 w-4 rounded border-slate-300 ${styles.checkbox}`}
+                                                                />
+                                                                <span className="ml-2">{offer}</span>
+                                                            </label>
+                                                        ))}
+                                                    </div>
+                                                </div>
+
+                                                <div>
+                                                    <h4 className="font-semibold text-slate-700 mb-2">¿Qué quieres destacar?</h4>
+                                                    <div className="space-y-2">
+                                                        {serviceDetails[cat.id as CareCategory].skills.map(skill => (
+                                                            <label key={skill} className="flex items-center text-sm text-slate-600">
+                                                                <input 
+                                                                    type="checkbox" 
+                                                                    checked={profile.detailedServices[cat.id as CareCategory]?.skills.includes(skill) || false}
+                                                                    onChange={() => handleDetailedServiceToggle(cat.id as CareCategory, 'skills', skill)}
+                                                                    className={`h-4 w-4 rounded border-slate-300 ${styles.checkbox}`}
+                                                                />
+                                                                <span className="ml-2">{skill}</span>
+                                                            </label>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                
+                        <div className="pt-4 border-t border-slate-200">
+                            <label htmlFor="hourlyRate" className="block text-sm font-medium text-slate-700 mb-1">Tu tarifa por hora (€)</label>
+                            <div className="relative">
+                                <input id="hourlyRate" name="hourlyRate" type="number" value={profile.hourlyRate} onChange={handleInputChange} placeholder="Ej: 12" min="0" className="w-full bg-slate-50 p-3 pr-10 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500" />
+                                <CurrencyEuroIcon className="absolute top-1/2 right-3 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                            </div>
+                        </div>
+                        <div>
+                            <label htmlFor="experience" className="block text-sm font-medium text-slate-700 mb-1">Nivel de Experiencia General</label>
+                            <div className="relative">
+                                <select id="experience" name="experience" value={profile.experience} onChange={handleInputChange} className="w-full appearance-none bg-slate-50 p-3 pr-10 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500">
+                                    <option value="" disabled>Selecciona una opción</option>
+                                    {experienceLevels.map(level => (
+                                        <option key={level.id} value={level.id}>{level.name}</option>
+                                    ))}
+                                </select>
+                                <StarIcon className="absolute top-1/2 right-3 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                            </div>
+                        </div>
+                    </section>
+                    
+                    <section className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-4">
+                        <h3 className="font-bold text-lg text-slate-800">Verificación (Opcional)</h3>
+                        <p className="text-sm text-slate-500">Sube tu DNI para obtener la insignia de "Verificado" y generar más confianza.</p>
+                        <label htmlFor="id-upload" className="w-full flex items-center justify-center bg-slate-50 p-4 border-2 border-dashed border-slate-300 rounded-xl cursor-pointer hover:bg-slate-100 hover:border-teal-400 transition-colors">
+                            <IdentificationIcon className="w-6 h-6 text-slate-400 mr-2" />
+                            <span className="text-slate-600 font-medium">Subir documento</span>
+                        </label>
+                        <input id="id-upload" type="file" className="hidden" accept="image/*,application/pdf" />
+                    </section>
                 </div>
-              );
-            })}
-          </div>
-        )}
-          
-        <div>
-          <label htmlFor="experience" className="block text-sm font-medium text-slate-700 mb-1">Nivel de Experiencia</label>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <StarIcon className="h-5 w-5 text-slate-400" />
-            </div>
-            <select
-              id="experience"
-              value={experience}
-              onChange={(e) => setExperience(e.target.value)}
-              className="w-full appearance-none bg-white p-3 pl-10 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 transition"
-            >
-              <option value="" disabled>Selecciona tu experiencia</option>
-              {experienceLevels.map(level => (
-                <option key={level.id} value={level.id}>{level.name}</option>
-              ))}
-            </select>
-          </div>
-        </div>
+            </main>
+            
+            <footer className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-lg border-t border-slate-200 z-10">
+                <div className="container mx-auto px-4 py-3">
+                    <button
+                        onClick={handleSave}
+                        disabled={!isFormValid || isSaving}
+                        className="w-full flex items-center justify-center bg-teal-500 text-white px-4 py-3.5 rounded-xl font-semibold hover:bg-teal-600 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 disabled:bg-slate-400 disabled:cursor-not-allowed"
+                    >
+                        {isSaving ? 'Creando perfil...' : (
+                            <>
+                                <CheckCircleIcon className="w-6 h-6 mr-2" />
+                                Crear Perfil
+                            </>
+                        )}
+                    </button>
+                </div>
+            </footer>
 
-        <div>
-          <label htmlFor="hourlyRate" className="block text-sm font-medium text-slate-700 mb-1">Tarifa por hora (€)</label>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <CurrencyEuroIcon className="h-5 w-5 text-slate-400" />
-            </div>
-            <input
-              id="hourlyRate"
-              type="number"
-              value={hourlyRate}
-              onChange={(e) => setHourlyRate(e.target.value)}
-              placeholder="Ej: 12"
-              className="w-full bg-white p-3 pl-10 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 transition"
-              min="0"
+            <PhotoUploadModal
+                isOpen={isPhotoModalOpen}
+                onClose={() => setIsPhotoModalOpen(false)}
+                onTakePhoto={handleTakePhoto}
+                onChooseFromGallery={handleChooseFromGallery}
             />
-          </div>
         </div>
-      </div>
-        
-      <div className="mt-8">
-        <button 
-          onClick={() => setStep(2)}
-          disabled={!isFormComplete}
-          className="w-full bg-teal-500 text-white px-4 py-3 rounded-xl font-semibold transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 disabled:bg-slate-300 disabled:cursor-not-allowed transform disabled:scale-100 hover:scale-105"
-        >
-          Continuar
-        </button>
-      </div>
-    </>
-  );
-
-  const renderPhotoStep = () => (
-    <div className="text-center">
-      <h1 className="text-3xl font-bold text-slate-800 mb-2">¡Genial! Ahora, una buena foto de perfil</h1>
-      <p className="text-slate-600 mb-8">Asegúrate de que tu cara se vea bien. ¡Una sonrisa ayuda mucho!</p>
-      
-      <div className="flex flex-col items-center space-y-6">
-        <div className="w-64 h-64 rounded-full overflow-hidden bg-slate-200 shadow-lg flex items-center justify-center border-4 border-white">
-          {photoDataUrl ? (
-            <img src={photoDataUrl} alt="Vista previa del perfil" className="w-full h-full object-cover" />
-          ) : (
-            <video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover scale-x-[-1]"></video>
-          )}
-        </div>
-        <canvas ref={canvasRef} className="hidden"></canvas>
-        
-        {photoDataUrl ? (
-          <div className="flex space-x-4">
-            <button onClick={handleRetakePhoto} className="px-6 py-2 bg-slate-200 text-slate-700 font-semibold rounded-lg hover:bg-slate-300 transition-colors">
-              Repetir foto
-            </button>
-            <button onClick={() => setStep(3)} className="px-6 py-2 bg-teal-500 text-white font-semibold rounded-lg hover:bg-teal-600 transition-colors">
-              Confirmar
-            </button>
-          </div>
-        ) : (
-          <button onClick={handleTakePhoto} className="bg-teal-500 text-white rounded-full p-4 shadow-lg hover:bg-teal-600 transition-colors transform hover:scale-110">
-            <CameraIcon className="w-8 h-8" />
-          </button>
-        )}
-      </div>
-    </div>
-  );
-
-  const renderVerificationStep = () => (
-    <>
-      <div className="text-center mb-8">
-        <ShieldCheckIcon className="h-24 w-24 mx-auto text-teal-500" />
-      </div>
-      <h1 className="text-3xl font-bold text-slate-800 mb-2">Verificación de Identidad</h1>
-      <p className="text-slate-600 mb-8">Un último paso para garantizar la seguridad en la comunidad. Tus datos son confidenciales.</p>
-
-      <div className="space-y-4">
-        <div>
-          <label htmlFor="fullName" className="block text-sm font-medium text-slate-700 mb-1">Nombre Completo</label>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><UserIcon className="h-5 w-5 text-slate-400" /></div>
-            <input id="fullName" type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Ej: Ana García Pérez" className="w-full bg-white p-3 pl-10 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 transition" />
-          </div>
-        </div>
-        <div>
-          <label htmlFor="phone" className="block text-sm font-medium text-slate-700 mb-1">Número de Teléfono</label>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><PhoneIcon className="h-5 w-5 text-slate-400" /></div>
-            <input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Ej: 600 123 456" className="w-full bg-white p-3 pl-10 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 transition" />
-          </div>
-        </div>
-        <div>
-          <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-1">
-            Correo Electrónico <span className="text-slate-500 font-normal">(Opcional)</span>
-          </label>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><MailIcon className="h-5 w-5 text-slate-400" /></div>
-            <input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Ej: ana.garcia@email.com" className="w-full bg-white p-3 pl-10 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 transition" />
-          </div>
-        </div>
-        <div>
-          <label htmlFor="id-upload" className="block text-sm font-medium text-slate-700 mb-1">
-            Documento de Identidad <span className="text-slate-500 font-normal">(Opcional)</span>
-          </label>
-          <label htmlFor="id-upload" className="w-full flex items-center bg-white p-3 border border-slate-300 rounded-xl cursor-pointer hover:bg-slate-50 relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><IdentificationIcon className="h-5 w-5 text-slate-400" /></div>
-            <span className={`pl-7 truncate ${idDocument ? 'text-slate-800' : 'text-slate-400'}`}>{idDocument ? idDocument.name : 'Subir foto (DNI, Pasaporte...)'}</span>
-          </label>
-          <input id="id-upload" type="file" onChange={handleFileChange} className="hidden" accept="image/*,application/pdf" />
-        </div>
-      </div>
-      
-      <div className="mt-8">
-        <button 
-          onClick={() => setStep(4)}
-          disabled={!isVerificationComplete}
-          className="w-full bg-teal-500 text-white px-4 py-3 rounded-xl font-semibold transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 disabled:bg-slate-300 disabled:cursor-not-allowed transform disabled:scale-100 hover:scale-105"
-        >
-          Indicar Ubicación
-        </button>
-      </div>
-    </>
-  );
-  
-  const renderLocationStep = () => (
-    <>
-      <div className="text-center mb-8">
-        <MapPinIcon className="h-24 w-24 mx-auto text-teal-500" />
-      </div>
-      <h1 className="text-3xl font-bold text-slate-800 mb-2">Indica tu zona de trabajo</h1>
-      <p className="text-slate-600 mb-8">Esto ayudará a que te encuentren personas cerca de ti. Puedes usar tu ubicación actual o introducir una dirección.</p>
-
-      <div className="space-y-4">
-        <button 
-          onClick={handleGetCurrentLocation}
-          disabled={locationStatus === 'loading'}
-          className="w-full flex items-center justify-center bg-white border-2 border-teal-500 text-teal-500 px-4 py-3 rounded-xl font-semibold transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 disabled:opacity-50 disabled:cursor-wait"
-        >
-          {locationStatus === 'loading' && <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-teal-500 mr-3"></div>}
-          {locationStatus === 'loading' ? 'Buscando...' : 'Usar mi ubicación actual'}
-        </button>
-
-        {locationStatus === 'success' && <p className="text-center text-green-600 font-medium">¡Ubicación guardada con éxito!</p>}
-        {locationStatus === 'error' && <p className="text-center text-red-600 font-medium">Hubo un error al obtener la ubicación.</p>}
-
-        <div className="text-center">
-          <button onClick={() => setShowManualInput(!showManualInput)} className="text-sm text-slate-500 hover:text-teal-600 font-medium">
-            O, introduce una dirección manualmente
-          </button>
-        </div>
-
-        {showManualInput && (
-          <div className="animate-fade-in">
-            <label htmlFor="manualLocation" className="block text-sm font-medium text-slate-700 mb-1">Dirección o Barrio</label>
-            <div className="relative">
-              <input 
-                id="manualLocation" 
-                type="text" 
-                value={manualLocation} 
-                onChange={(e) => setManualLocation(e.target.value)} 
-                placeholder="Ej: Calle Mayor, 1, Madrid" 
-                className="w-full bg-white p-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 transition" 
-              />
-            </div>
-          </div>
-        )}
-      </div>
-
-      <div className="mt-8">
-        <button 
-          onClick={onClose}
-          disabled={!isLocationComplete}
-          className="w-full bg-teal-500 text-white px-4 py-3 rounded-xl font-semibold transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 disabled:bg-slate-300 disabled:cursor-not-allowed transform disabled:scale-100 hover:scale-105"
-        >
-          Finalizar y Guardar Perfil
-        </button>
-      </div>
-    </>
-  );
-
-
-  const renderStepContent = () => {
-    switch (step) {
-      case 1: return renderFormStep();
-      case 2: return renderPhotoStep();
-      case 3: return renderVerificationStep();
-      case 4: return renderLocationStep();
-      default: return renderFormStep();
-    }
-  };
-
-  return (
-    <div className="bg-slate-50 min-h-screen animate-fade-in">
-      <header className="flex-shrink-0 bg-slate-50/80 backdrop-blur-lg sticky top-0 z-30">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-end">
-          <button 
-            onClick={() => step > 1 ? setStep(step - 1) : onClose()} 
-            className="text-slate-600 font-semibold hover:text-teal-500"
-          >
-            {step > 1 ? 'Atrás' : 'Salir'}
-          </button>
-        </div>
-      </header>
-      <main className="container mx-auto px-4 py-6 pb-28">
-        {renderStepContent()}
-      </main>
-    </div>
-  );
+    );
 };
 
 export default OfferService;

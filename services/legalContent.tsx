@@ -1,0 +1,112 @@
+import React from 'react';
+import { LegalDocument } from '../App';
+
+export const legalDocuments: LegalDocument[] = [
+  {
+    id: 'terms',
+    title: 'Términos y Condiciones',
+    description: 'Las reglas y directrices para usar nuestros servicios.',
+    content: (
+      <>
+        <h2>1. Aceptación de los Términos</h2>
+        <p>Al acceder o utilizar la aplicación Cuidamet ("el Servicio"), usted acepta estar sujeto a estos Términos y Condiciones. Si no está de acuerdo con alguna parte de los términos, no podrá acceder al Servicio.</p>
+
+        <h2>2. Descripción del Servicio</h2>
+        <p>Cuidamet es una plataforma tecnológica que permite a los usuarios ("Usuarios") encontrar y conectar con proveedores de servicios de cuidado independientes ("Cuidadores") para personas mayores, niños y mascotas.</p>
+        
+        <h2>3. Rol y Responsabilidad de Cuidamet</h2>
+        <p><strong>Cuidamet actúa únicamente como un intermediario tecnológico y un punto de encuentro.</strong> Nuestra plataforma facilita el contacto entre Usuarios y Cuidadores. No empleamos a los Cuidadores, y estos actúan como contratistas independientes.</p>
+        <p>Usted entiende y acepta que Cuidamet:</p>
+        <ul>
+          <li>No es responsable de la conducta, acciones u omisiones de ningún Usuario o Cuidador, ya sea en línea o fuera de línea.</li>
+          <li>No garantiza la calidad, seguridad o legalidad de los servicios proporcionados por los Cuidadores.</li>
+          <li>Realiza verificaciones básicas de identidad, pero <strong>la responsabilidad final de seleccionar un Cuidador adecuado y de verificar sus credenciales, experiencia y referencias recae exclusivamente en el Usuario.</strong></li>
+        </ul>
+        <p>Cualquier acuerdo, contrato o arreglo para la prestación de servicios de cuidado se realiza directamente entre el Usuario y el Cuidador. Cuidamet no es parte de dicho acuerdo y se exime de toda responsabilidad derivada del mismo.</p>
+
+        <h2>4. Obligaciones del Usuario</h2>
+        <p>Usted se compromete a proporcionar información precisa y completa, a tratar a los Cuidadores con respeto y a cumplir con todas las leyes aplicables al contratar servicios de cuidado.</p>
+      </>
+    ),
+  },
+  {
+    id: 'privacy',
+    title: 'Política de Privacidad',
+    description: 'Cómo recopilamos, usamos y protegemos tus datos.',
+    content: (
+      <>
+        <h2>1. Información que Recopilamos</h2>
+        <p>Recopilamos la información que nos proporcionas directamente, como tu nombre, correo electrónico, número de teléfono y dirección al registrarte. También recopilamos datos de uso, información del dispositivo y, con tu permiso, datos de geolocalización.</p>
+
+        <h2>2. Cómo Usamos tu Información</h2>
+        <p>Usamos tu información para:</p>
+        <ul>
+            <li>Proveer, mantener y mejorar nuestro Servicio.</li>
+            <li>Conectarte con Cuidadores o familias en tu área.</li>
+            <li>Procesar transacciones y enviar notificaciones.</li>
+            <li>Personalizar tu experiencia y ofrecerte soporte.</li>
+            <li>Garantizar la seguridad de nuestra plataforma.</li>
+        </ul>
+        
+        <h2>3. Cómo Compartimos tu Información</h2>
+        <p>Compartimos información entre Usuarios y Cuidadores para facilitar la conexión (por ejemplo, tu nombre y la descripción del servicio que buscas). No compartimos tu información de contacto personal hasta que decidas iniciar una conversación. No vendemos tus datos personales a terceros.</p>
+
+        <h2>4. Seguridad de los Datos</h2>
+        <p>Implementamos medidas de seguridad razonables para proteger tu información contra el acceso no autorizado, la alteración o la destrucción. Sin embargo, ningún sistema es 100% seguro.</p>
+        
+        <h2>5. Tus Derechos</h2>
+        <p>Tienes derecho a acceder, rectificar o eliminar tus datos personales. Puedes gestionar tu información desde la configuración de tu perfil o contactándonos directamente.</p>
+      </>
+    ),
+  },
+  {
+    id: 'cookies',
+    title: 'Política de Cookies',
+    description: 'Información sobre las cookies que utilizamos en nuestra app.',
+    content: (
+     <>
+        <h2>1. ¿Qué son las Cookies?</h2>
+        <p>Las cookies son pequeños archivos de texto que se almacenan en tu dispositivo cuando visitas un sitio web o usas una aplicación. Nos ayudan a que el servicio funcione correctamente y a mejorar tu experiencia.</p>
+
+        <h2>2. Tipos de Cookies que Utilizamos</h2>
+        <ul>
+          <li><strong>Cookies Esenciales:</strong> Son necesarias para el funcionamiento básico de la aplicación, como mantener tu sesión iniciada o procesar pagos. No se pueden desactivar.</li>
+          <li><strong>Cookies de Rendimiento y Análisis:</strong> Nos ayudan a entender cómo usas Cuidamet, qué funciones son más populares y cómo podemos mejorar. Estos datos son anónimos.</li>
+          <li><strong>Cookies de Funcionalidad:</strong> Permiten recordar tus preferencias, como tu ubicación predeterminada o tus filtros de búsqueda, para ofrecerte una experiencia más personalizada.</li>
+        </ul>
+
+        <h2>3. Gestión de Cookies</h2>
+        <p>Puedes gestionar tus preferencias de cookies a través de la configuración de tu navegador o dispositivo. Ten en cuenta que deshabilitar ciertas cookies puede afectar la funcionalidad de la aplicación.</p>
+      </>
+    ),
+  },
+  {
+    id: 'legal-notice',
+    title: 'Aviso Legal',
+    description: 'Información corporativa y legal sobre Cuidamet.',
+    content: (
+        <>
+            <p><strong>Denominación Social:</strong> Cuidamet Technologies S.L.</p>
+            <p><strong>Domicilio Social:</strong> Calle Ficticia 123, 28080 Madrid, España.</p>
+            <p><strong>Email de Contacto:</strong> legal@cuidamet.com</p>
+            <p><strong>Datos Registrales:</strong> Inscrita en el Registro Mercantil de Madrid.</p>
+        </>
+    )
+  },
+  {
+    id: 'licenses',
+    title: 'Licencias de Terceros',
+    description: 'Créditos y licencias del software que nos ayuda a funcionar.',
+    content: (
+        <>
+            <p>Cuidamet utiliza varias librerías y herramientas de código abierto. Agradecemos a la comunidad de desarrolladores por su contribución.</p>
+            <ul>
+                <li><strong>React:</strong> Licencia MIT</li>
+                <li><strong>Tailwind CSS:</strong> Licencia MIT</li>
+                <li><strong>Leaflet:</strong> Licencia BSD-2-Clause</li>
+                <li><strong>Unsplash:</strong> Las imágenes se utilizan bajo la Licencia de Unsplash.</li>
+            </ul>
+        </>
+    )
+  }
+];
