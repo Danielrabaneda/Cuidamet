@@ -10,6 +10,7 @@ interface ProfilePageProps {
   onNavigateFavorites: () => void;
   onNavigateSettings: () => void;
   onNavigateMyCaregiverProfile: () => void;
+  onNavigateSupport: () => void;
 }
 
 interface ListItemProps {
@@ -31,10 +32,10 @@ const ListItem: React.FC<ListItemProps> = ({ icon, label, onClick }) => (
   </li>
 );
 
-const ProfilePage: React.FC<ProfilePageProps> = ({ onNavigateFavorites, onNavigateSettings, onNavigateMyCaregiverProfile }) => {
+const ProfilePage: React.FC<ProfilePageProps> = ({ onNavigateFavorites, onNavigateSettings, onNavigateMyCaregiverProfile, onNavigateSupport }) => {
   return (
     <div className="bg-slate-50 min-h-screen">
-        <main className="container mx-auto px-4 py-6 pb-28">
+        <main className="container mx-auto px-4 py-6 pb-36">
             {/* User Info Header */}
             <div className="flex items-center space-x-4 py-4">
                 <img
@@ -81,7 +82,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onNavigateFavorites, onNaviga
                     <ListItem
                         icon={<QuestionMarkCircleIcon className="w-6 h-6" />}
                         label="Centro de Ayuda"
-                        onClick={() => alert('Navegando al centro de ayuda...')}
+                        onClick={onNavigateSupport}
                     />
                 </ul>
             </div>

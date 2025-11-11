@@ -29,7 +29,7 @@ const HelpCenterPage: React.FC<HelpCenterPageProps> = ({ onBack }) => {
   return (
     <div className="bg-white min-h-screen">
       <PageHeader title="Centro de Ayuda" onBack={onBack} />
-      <main className="flex-grow overflow-y-auto p-6 container mx-auto">
+      <main className="flex-grow overflow-y-auto p-6 container mx-auto pb-36">
         <div className="text-center">
             <QuestionMarkCircleIcon className="w-16 h-16 mx-auto text-teal-500 mb-4" />
             <h2 className="text-3xl font-bold text-slate-800">Preguntas Frecuentes</h2>

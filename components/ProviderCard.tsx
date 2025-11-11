@@ -15,6 +15,13 @@ interface ProviderCardProps {
   currentCategory: CareCategory | 'all';
 }
 
+const getBadgeColor = (badge: string) => {
+    if (badge.toLowerCase().includes('mejor valorado')) return 'bg-amber-100 text-amber-800';
+    if (badge.toLowerCase().includes('experto')) return 'bg-blue-100 text-blue-800';
+    if (badge.toLowerCase().includes('rápida')) return 'bg-green-100 text-green-800';
+    return 'bg-slate-100 text-slate-800';
+}
+
 const ProviderCard: React.FC<ProviderCardProps> = ({ provider, isFavorite, onToggleFavorite, onViewProfile, currentCategory }) => {
   
   const handleFavoriteClick = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -57,6 +64,15 @@ const ProviderCard: React.FC<ProviderCardProps> = ({ provider, isFavorite, onTog
             <ShareIcon className="w-5 h-5" />
           </button>
         </div>
+        {provider.badges && provider.badges.length > 0 && (
+            <div className="absolute bottom-2 left-2 flex flex-wrap gap-1">
+                {provider.badges.map(badge => (
+                    <span key={badge} className={`text-xs font-bold px-2 py-0.5 rounded-full ${getBadgeColor(badge)}`}>
+                        {badge}
+                    </span>
+                ))}
+            </div>
+        )}
       </div>
       <div className="p-4">
         <div className="flex justify-between items-start">

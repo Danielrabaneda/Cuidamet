@@ -17,7 +17,7 @@ const ContactPage: React.FC<ContactPageProps> = ({ onBack }) => {
   return (
     <div className="bg-white min-h-screen">
       <PageHeader title="Contacto" onBack={onBack} />
-      <main className="flex-grow overflow-y-auto p-6 container mx-auto">
+      <main className="flex-grow overflow-y-auto p-6 container mx-auto pb-36">
         <div className="text-center">
           <h2 className="text-3xl font-bold text-slate-800">Ponte en contacto</h2>
           <p className="text-slate-600 mt-2 max-w-lg mx-auto">¿Tienes alguna pregunta o necesitas ayuda? Estamos aquí para ayudarte.</p>

@@ -2,7 +2,7 @@ import React from 'react';
 import PageHeader from './PageHeader';
 import DocumentTextIcon from './icons/DocumentTextIcon';
 import ChevronRightIcon from './icons/ChevronRightIcon';
-import { LegalDocument } from '../../App';
+import { LegalDocument } from '../App';
 
 interface LegalInfoPageProps {
   onBack: () => void;
@@ -35,7 +35,7 @@ const LegalInfoPage: React.FC<LegalInfoPageProps> = ({ onBack, onNavigateLegalDo
   return (
     <div className="bg-slate-50 min-h-screen">
       <PageHeader title="Tu Información Legal" onBack={onBack} />
-      <main className="container mx-auto px-4 py-6">
+      <main className="container mx-auto px-4 py-6 pb-36">
         
         <div className="text-center mb-8">
             <div className="inline-block bg-teal-100 p-4 rounded-full">

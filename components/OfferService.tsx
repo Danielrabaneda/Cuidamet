@@ -250,7 +250,7 @@ const OfferService: React.FC<OfferServiceProps> = ({ onClose }) => {
                         <div>
                             <label htmlFor="name" className="block text-sm font-medium text-slate-700 mb-1">Tu nombre público</label>
                             <div className="relative">
-                                <input id="name" name="name" type="text" value={profile.name} onChange={handleInputChange} placeholder="Ej: Sofía López" className="w-full bg-slate-50 p-3 pl-4 pr-10 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500" />
+                                <input id="name" name="name" type="text" value={profile.name} onChange={handleInputChange} placeholder="Ej: Sofía López" className="w-full bg-slate-50 p-3 pl-4 pr-10 border border-slate-300 rounded-xl text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500" />
                                 <PencilIcon className="absolute top-1/2 right-3 -translate-y-1/2 w-5 h-5 text-slate-400" />
                             </div>
                         </div>
@@ -264,7 +264,7 @@ const OfferService: React.FC<OfferServiceProps> = ({ onClose }) => {
                                 Usar mi ubicación actual
                             </button>
                             <div className="relative">
-                                <input id="location" name="location" type="text" value={profile.location} onChange={handleInputChange} placeholder="Ej: Arganzuela, Madrid" className="w-full bg-slate-50 p-3 pl-4 pr-10 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500" />
+                                <input id="location" name="location" type="text" value={profile.location} onChange={handleInputChange} placeholder="Ej: Arganzuela, Madrid" className="w-full bg-slate-50 p-3 pl-4 pr-10 border border-slate-300 rounded-xl text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500" />
                                 <MapPinIcon className="absolute top-1/2 right-3 -translate-y-1/2 w-5 h-5 text-slate-400" />
                             </div>
                             {locationStatus === 'success' && <p className="text-sm text-green-600 mt-2">¡Ubicación detectada!</p>}
@@ -302,7 +302,7 @@ const OfferService: React.FC<OfferServiceProps> = ({ onClose }) => {
                                                         value={profile.descriptions[cat.id] || ''} 
                                                         onChange={(e) => handleDescriptionChange(cat.id, e.target.value)} 
                                                         maxLength={250} 
-                                                        className="w-full h-24 p-3 bg-slate-50 border border-slate-300 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-teal-500"
+                                                        className="w-full h-24 p-3 bg-slate-50 border border-slate-300 rounded-xl resize-none text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500"
                                                         placeholder="Ej: Llevo 5 años cuidando niños, soy paciente y me encantan los juegos..."
                                                     />
                                                 </div>
@@ -351,14 +351,14 @@ const OfferService: React.FC<OfferServiceProps> = ({ onClose }) => {
                         <div className="pt-4 border-t border-slate-200">
                             <label htmlFor="hourlyRate" className="block text-sm font-medium text-slate-700 mb-1">Tu tarifa por hora (€)</label>
                             <div className="relative">
-                                <input id="hourlyRate" name="hourlyRate" type="number" value={profile.hourlyRate} onChange={handleInputChange} placeholder="Ej: 12" min="0" className="w-full bg-slate-50 p-3 pr-10 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500" />
+                                <input id="hourlyRate" name="hourlyRate" type="number" value={profile.hourlyRate} onChange={handleInputChange} placeholder="Ej: 12" min="0" className="w-full bg-slate-50 p-3 pr-10 border border-slate-300 rounded-xl text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500" />
                                 <CurrencyEuroIcon className="absolute top-1/2 right-3 -translate-y-1/2 w-5 h-5 text-slate-400" />
                             </div>
                         </div>
                         <div>
                             <label htmlFor="experience" className="block text-sm font-medium text-slate-700 mb-1">Nivel de Experiencia General</label>
                             <div className="relative">
-                                <select id="experience" name="experience" value={profile.experience} onChange={handleInputChange} className="w-full appearance-none bg-slate-50 p-3 pr-10 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500">
+                                <select id="experience" name="experience" value={profile.experience} onChange={handleInputChange} className="w-full appearance-none bg-slate-50 p-3 pr-10 border border-slate-300 rounded-xl text-slate-800 focus:outline-none focus:ring-2 focus:ring-teal-500">
                                     <option value="" disabled>Selecciona una opción</option>
                                     {experienceLevels.map(level => (
                                         <option key={level.id} value={level.id}>{level.name}</option>

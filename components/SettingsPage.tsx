@@ -53,7 +53,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({
   return (
     <div className="bg-slate-50 min-h-screen">
       <PageHeader title="Configuración" onBack={onBack} />
-      <main className="container mx-auto px-4 py-6">
+      <main className="container mx-auto px-4 py-6 pb-36">
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
           <ul>
             {settingsOptions.map((option) => (

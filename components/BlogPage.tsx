@@ -17,7 +17,7 @@ const BlogPage: React.FC<BlogPageProps> = ({ onBack }) => {
   return (
     <div className="bg-white min-h-screen">
       <PageHeader title="Blog" onBack={onBack} />
-      <main className="flex-grow overflow-y-auto p-6 container mx-auto">
+      <main className="flex-grow overflow-y-auto p-6 container mx-auto pb-36">
         <h2 className="text-3xl font-bold text-slate-800 mb-6">Últimos Artículos</h2>
         <ul className="space-y-4">
           {blogPosts.map(post => (

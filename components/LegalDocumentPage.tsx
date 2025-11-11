@@ -11,7 +11,7 @@ const LegalDocumentPage: React.FC<LegalDocumentPageProps> = ({ title, content, o
   return (
     <div className="bg-white min-h-screen">
       <PageHeader title={title} onBack={onBack} />
-      <main className="container mx-auto px-4 py-6">
+      <main className="container mx-auto px-4 py-6 pb-36">
         <div className="prose prose-slate max-w-none">
           {content}
         </div>

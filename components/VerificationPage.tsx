@@ -31,7 +31,7 @@ const VerificationPage: React.FC<VerificationPageProps> = ({ onBack }) => {
   return (
     <div className="bg-white min-h-screen">
       <PageHeader title="Verificación para Cuidadores" onBack={onBack} />
-      <main className="flex-grow overflow-y-auto p-6 container mx-auto">
+      <main className="flex-grow overflow-y-auto p-6 container mx-auto pb-36">
         <div className="text-center">
             <h2 className="text-3xl font-bold text-slate-800">Gana la confianza de las familias</h2>
             <p className="text-slate-600 mt-2 max-w-2xl mx-auto">Un perfil verificado tiene hasta 5 veces más probabilidades de ser contratado. ¡Es gratis y rápido!</p>

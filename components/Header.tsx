@@ -27,7 +27,7 @@ const Header: React.FC<HeaderProps> = ({ searchQuery, onSearchQueryChange }) => 
                 value={searchQuery}
                 onChange={(e) => onSearchQueryChange(e.target.value)}
                 placeholder="Busca por nombre, servicio, zona..."
-                className="w-full bg-slate-100 border border-slate-200 rounded-lg py-2 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
+                className="w-full bg-slate-100 border border-slate-200 rounded-lg py-2 pl-10 pr-4 text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
               />
             </div>
           </div>

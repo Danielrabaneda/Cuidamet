@@ -1,4 +1,5 @@
 
+
 import React from 'react';
 import { Provider, CareCategory } from '../types';
 import ChevronLeftIcon from './icons/ChevronLeftIcon';
@@ -8,7 +9,7 @@ import InformationCircleIcon from './icons/InformationCircleIcon';
 import ShieldCheckIcon from './icons/ShieldCheckIcon';
 import CurrencyDollarIcon from './icons/CurrencyDollarIcon';
 import ChevronRightIcon from './icons/ChevronRightIcon';
-import ChatBubbleLeftRightIcon from './icons/ChatBubbleLeftRightIcon';
+import CreditCardIcon from './icons/CreditCardIcon';
 import StarRating from './StarRating';
 
 
@@ -16,7 +17,7 @@ interface ProfileDetailProps {
   provider: Provider | null | undefined;
   isLoading: boolean;
   onBack: () => void;
-  onContact: (providerId: number) => void;
+  onBookNow: (providerId: number) => void;
 }
 
 const categoryDisplayNames: Record<CareCategory, string> = {
@@ -24,6 +25,20 @@ const categoryDisplayNames: Record<CareCategory, string> = {
     [CareCategory.CHILDREN]: 'Cuidado de Niños',
     [CareCategory.PETS]: 'Cuidado de Mascotas',
 };
+
+const getBadgeStyle = (badge: string) => {
+    if (badge.toLowerCase().includes('mejor valorado')) {
+        return { icon: <StarIcon className="w-4 h-4 text-amber-600" />, style: 'bg-amber-100 text-amber-800 border-amber-200' };
+    }
+    if (badge.toLowerCase().includes('experto')) {
+        return { icon: <ShieldCheckIcon className="w-4 h-4 text-blue-600" />, style: 'bg-blue-100 text-blue-800 border-blue-200' };
+    }
+    if (badge.toLowerCase().includes('rápida')) {
+        return { icon: <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>, style: 'bg-green-100 text-green-800 border-green-200' };
+    }
+    return { icon: null, style: 'bg-slate-100 text-slate-800 border-slate-200' };
+}
+
 
 const DetailHeader: React.FC<{ title: string; onBack: () => void }> = ({ title, onBack }) => (
     <header className="flex-shrink-0 bg-white/80 backdrop-blur-lg border-b border-slate-200 sticky top-0 z-10">
@@ -37,7 +52,7 @@ const DetailHeader: React.FC<{ title: string; onBack: () => void }> = ({ title, 
     </header>
 );
 
-const ProfileDetail: React.FC<ProfileDetailProps> = ({ provider, isLoading, onBack, onContact }) => {
+const ProfileDetail: React.FC<ProfileDetailProps> = ({ provider, isLoading, onBack, onBookNow }) => {
     
   if (isLoading) {
     return (
@@ -103,6 +118,19 @@ const ProfileDetail: React.FC<ProfileDetailProps> = ({ provider, isLoading, onBa
              <LocationPinIcon className="w-4 h-4 mr-1"/>
              <span>{provider.location}</span>
           </div>
+          {provider.badges && provider.badges.length > 0 && (
+            <div className="mt-4 flex flex-wrap justify-center gap-2">
+              {provider.badges.map(badge => {
+                const { icon, style } = getBadgeStyle(badge);
+                return (
+                  <div key={badge} className={`flex items-center text-xs font-semibold px-3 py-1 rounded-full border ${style}`}>
+                    {icon}
+                    <span className="ml-1.5">{badge}</span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </section>
 
         {/* Sections */}
@@ -142,7 +170,10 @@ const ProfileDetail: React.FC<ProfileDetailProps> = ({ provider, isLoading, onBa
           {/* Reviews Section */}
           {provider.reviews && provider.reviews.length > 0 && (
             <div className="bg-slate-50/70 rounded-xl p-4">
-                <h3 className="font-semibold text-slate-800 mb-4">Valoraciones ({provider.reviews.length})</h3>
+                <div className="flex justify-between items-center mb-4">
+                    <h3 className="font-semibold text-slate-800">Valoraciones ({provider.reviews.length})</h3>
+                    <p className="text-xs text-slate-500 bg-slate-200 px-2 py-1 rounded-md">Solo de servicios verificados</p>
+                </div>
                 <ul className="space-y-6">
                 {provider.reviews.map(review => (
                     <li key={review.id} className="flex items-start space-x-4">
@@ -185,10 +216,10 @@ const ProfileDetail: React.FC<ProfileDetailProps> = ({ provider, isLoading, onBa
        <footer className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-lg border-t border-slate-200 z-10">
         <div className="container mx-auto px-4 py-3">
           <button 
-            onClick={() => onContact(provider.id)}
+            onClick={() => onBookNow(provider.id)}
             className="w-full bg-teal-500 text-white px-4 py-3 rounded-xl font-semibold hover:bg-teal-600 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 flex items-center justify-center text-lg">
-            <ChatBubbleLeftRightIcon className="w-6 h-6 mr-2"/>
-            Contactar
+            <CreditCardIcon className="w-6 h-6 mr-2"/>
+            Reservar Ahora
           </button>
         </div>
       </footer>

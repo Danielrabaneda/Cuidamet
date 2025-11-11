@@ -1,7 +1,7 @@
 
 
 import React, { useState, useEffect } from 'react';
-import { CareCategory, Provider, ChatConversation, Message } from './types';
+import { CareCategory, Provider, ChatConversation, Message, BookingDetails } from './types';
 import { MOCK_PROVIDERS } from './services/mockData';
 import { MOCK_CHATS } from './services/mockChatData';
 import Header from './components/Header';
@@ -32,6 +32,13 @@ import LegalInfoPage from './components/LegalInfoPage';
 import LegalDocumentPage from './components/LegalDocumentPage';
 import ConfirmationModal from './components/ConfirmationModal';
 import { legalDocuments } from './services/legalContent';
+import BookingPage from './components/BookingPage';
+import PaymentPage from './components/PaymentPage';
+import ConfirmationPage from './components/ConfirmationPage';
+import PageHeader from './components/PageHeader';
+import SupportPage from './components/SupportPage';
+import SupportChatPage from './components/SupportChatPage';
+import SupportEmailPage from './components/SupportEmailPage';
 
 
 const getDistanceInKm = (lat1: number, lon1: number, lat2: number, lon2: number) => {
@@ -49,7 +56,7 @@ const getDistanceInKm = (lat1: number, lon1: number, lat2: number, lon2: number)
   return distance;
 };
 
-type View = 'landing' | 'providers' | 'favorites' | 'profile' | 'offer' | 'inbox' | 'chat' | 'myProfile' | 'map' | 'prices' | 'security' | 'verification' | 'help' | 'about' | 'blog' | 'contact' | 'settings' | 'editProfile' | 'securitySettings' | 'notifications' | 'legalInfo' | 'legalDocument' | 'myCaregiverProfile';
+type View = 'landing' | 'providers' | 'favorites' | 'profile' | 'offer' | 'inbox' | 'chat' | 'myProfile' | 'map' | 'prices' | 'security' | 'verification' | 'help' | 'about' | 'blog' | 'contact' | 'settings' | 'editProfile' | 'securitySettings' | 'notifications' | 'legalInfo' | 'legalDocument' | 'myCaregiverProfile' | 'booking' | 'payment' | 'confirmation' | 'support' | 'supportChat' | 'supportEmail';
 
 export interface LegalDocument {
   id: string;
@@ -61,7 +68,7 @@ export interface LegalDocument {
 
 const App: React.FC = () => {
   const [view, setView] = useState<View>('landing');
-  const [previousView, setPreviousView] = useState<'providers' | 'favorites' | 'map' | 'settings' | 'myProfile' | 'legalInfo' | 'myCaregiverProfile'>('providers');
+  const [previousView, setPreviousView] = useState<'providers' | 'favorites' | 'map' | 'settings' | 'myProfile' | 'legalInfo' | 'myCaregiverProfile' | 'profile' | 'support'>('providers');
   const [selectedProviderId, setSelectedProviderId] = useState<number | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<CareCategory | 'all'>('all');
   const [providers, setProviders] = useState<Provider[]>([]);
@@ -86,6 +93,8 @@ const App: React.FC = () => {
   });
   
   const [editingCategory, setEditingCategory] = useState<CareCategory | null>(null);
+  const [bookingDetails, setBookingDetails] = useState<BookingDetails | null>(null);
+  const [navigationContext, setNavigationContext] = useState<View | null>(null);
 
 
   useEffect(() => {
@@ -158,6 +167,11 @@ const App: React.FC = () => {
   };
 
   const handleNavigateFavorites = () => {
+    if (view === 'myProfile') {
+        setNavigationContext('myProfile');
+    } else {
+        setNavigationContext(null);
+    }
     window.scrollTo(0, 0);
     setView('favorites');
     setSelectedProviderId(null);
@@ -192,6 +206,16 @@ const App: React.FC = () => {
   
   const handleBackToProfile = () => {
       setView('myProfile');
+      setNavigationContext(null);
+  };
+
+  const handleNavigateSupport = () => {
+    setPreviousView('myProfile');
+    setView('support');
+  };
+
+  const handleBackToSupport = () => {
+    setView('support');
   };
   
   const handleBackToSettings = () => {
@@ -281,8 +305,13 @@ const App: React.FC = () => {
   };
 
   const handleBackToList = () => {
+    if (view === 'booking' || view === 'payment') {
+        setView('profile');
+        return;
+    }
     setView(previousView as 'providers' | 'favorites' | 'map');
     setSelectedProviderId(null);
+    setBookingDetails(null);
   }
   
   const handleBackToInbox = () => {
@@ -306,23 +335,48 @@ const App: React.FC = () => {
   };
 
   const handleContactProvider = (providerId: number) => {
+    const provider = providers.find(p => p.id === providerId);
+    if (!provider) return;
+
     const existingChat = chats.find(chat => chat.provider.id === providerId);
     if (existingChat) {
-      handleViewChat(existingChat.id);
+        handleViewChat(existingChat.id);
     } else {
-      const provider = providers.find(p => p.id === providerId);
-      if (provider) {
         const newChat: ChatConversation = {
-          id: chats.length + 1,
-          provider,
-          messages: [],
+            id: chats.length + 1,
+            provider,
+            messages: [],
         };
         setChats(prevChats => [...prevChats, newChat]);
-        setCurrentChatId(newChat.id);
-        setView('chat');
-      }
+        handleViewChat(newChat.id);
     }
   };
+
+  const handleStartBooking = (providerId: number) => {
+      setSelectedProviderId(providerId);
+      setView('booking');
+  };
+
+  const handleProceedToPayment = (details: BookingDetails) => {
+      setBookingDetails(details);
+      setView('payment');
+  };
+
+  const handleConfirmPayment = () => {
+      // In a real app, payment would be processed here
+      setView('confirmation');
+  };
+
+  const handleFinishBooking = () => {
+      if (bookingDetails) {
+          handleContactProvider(bookingDetails.providerId);
+          setBookingDetails(null);
+          setSelectedProviderId(null);
+      } else {
+          handleNavigateHome(); // Fallback
+      }
+  };
+
   
   const handleSendMessage = (chatId: number, text: string) => {
     const newMessage: Message = {
@@ -397,11 +451,33 @@ const App: React.FC = () => {
           provider={isProfileLoading ? null : provider}
           isLoading={isProfileLoading}
           onBack={handleBackToList}
-          onContact={handleContactProvider}
+          onBookNow={handleStartBooking}
         />
       );
     }
     
+    if (view === 'booking' && selectedProviderId) {
+        const provider = providers.find(p => p.id === selectedProviderId);
+        if (provider) {
+            return <BookingPage provider={provider} onProceed={handleProceedToPayment} onBack={() => setView('profile')} />;
+        }
+    }
+    
+    if (view === 'payment' && selectedProviderId && bookingDetails) {
+        const provider = providers.find(p => p.id === selectedProviderId);
+        if (provider) {
+            return <PaymentPage provider={provider} bookingDetails={bookingDetails} onConfirm={handleConfirmPayment} onBack={() => setView('booking')} />;
+        }
+    }
+
+    if (view === 'confirmation' && selectedProviderId && bookingDetails) {
+        const provider = providers.find(p => p.id === selectedProviderId);
+        if (provider) {
+            return <ConfirmationPage provider={provider} bookingDetails={bookingDetails} onGoToChat={handleFinishBooking} />;
+        }
+    }
+
+
     if (view === 'inbox') {
       return <Inbox chats={chats} onViewChat={handleViewChat} />;
     }
@@ -428,7 +504,7 @@ const App: React.FC = () => {
     }
     
     if (view === 'myProfile') {
-      return <ProfilePage onNavigateFavorites={handleNavigateFavorites} onNavigateSettings={handleNavigateSettings} onNavigateMyCaregiverProfile={handleNavigateMyCaregiverProfile} />;
+      return <ProfilePage onNavigateFavorites={handleNavigateFavorites} onNavigateSettings={handleNavigateSettings} onNavigateMyCaregiverProfile={handleNavigateMyCaregiverProfile} onNavigateSupport={handleNavigateSupport} />;
     }
     
     // Settings Pages
@@ -450,111 +526,122 @@ const App: React.FC = () => {
     if (view === 'legalDocument' && currentLegalDocument) {
       return <LegalDocumentPage onBack={handleBackToLegalInfo} title={currentLegalDocument.title} content={currentLegalDocument.content} />;
     }
-
     
-    // Providers or Favorites view
-    const baseProviders = view === 'favorites'
-      ? providersWithDistance.filter(p => favorites.has(p.id))
-      : providersWithDistance;
+    // Support Pages
+    if (view === 'support') return <SupportPage onBack={handleBackToProfile} onNavigateChat={() => { setPreviousView('support'); setView('supportChat'); }} onNavigateEmail={() => { setPreviousView('support'); setView('supportEmail'); }} />;
+    if (view === 'supportChat') return <SupportChatPage onBack={handleBackToSupport} />;
+    if (view === 'supportEmail') return <SupportEmailPage onBack={handleBackToSupport} />;
 
-    const categoryFilteredProviders = (selectedCategory === 'all' 
-      ? baseProviders
-      : baseProviders.filter(p => p.categories.includes(selectedCategory))
-    );
+    const renderProviderGrid = (providersToList: Provider[], viewType: 'providers' | 'favorites') => {
+        return isLoading ? (
+          <div className="text-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-500 mx-auto"></div>
+            <p className="mt-4 text-slate-500">Buscando cuidadores...</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 gap-4">
+            {providersToList.length > 0 ? (
+              providersToList.map(provider => (
+                <ProviderCard 
+                  key={provider.id} 
+                  provider={provider}
+                  isFavorite={favorites.has(provider.id)}
+                  onToggleFavorite={handleToggleFavorite}
+                  onViewProfile={handleViewProfile}
+                  currentCategory={selectedCategory}
+                />
+              ))
+            ) : (
+              <div className="col-span-full text-center py-12">
+                {viewType === 'favorites' ? (
+                  <>
+                    <p className="text-slate-500">Aún no tienes cuidadores favoritos.</p>
+                    <p className="text-slate-500 mt-1">Pulsa el corazón en un perfil para añadirlo.</p>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-slate-600 font-semibold text-lg">No se encontraron resultados</p>
+                    <p className="text-slate-500 mt-1">Prueba a cambiar los filtros o el término de búsqueda.</p>
+                  </>
+                )}
+              </div>
+            )}
+          </div>
+        );
+    };
 
-    const searchedProviders = searchQuery.trim() === ''
-      ? categoryFilteredProviders
-      : categoryFilteredProviders.filter(provider => {
-          const query = searchQuery.toLowerCase().trim();
-          
-          const nameMatch = provider.name.toLowerCase().includes(query);
-          const locationMatch = provider.location.toLowerCase().includes(query);
-          const serviceMatch = provider.services.some(service => service.toLowerCase().includes(query));
-          const descriptionMatch = provider.descriptions.some(desc => desc.text.toLowerCase().includes(query));
-          
-          return nameMatch || locationMatch || serviceMatch || descriptionMatch;
-      });
+    if (view === 'providers' || view === 'favorites') {
+        const baseProviders = view === 'favorites'
+        ? providersWithDistance.filter(p => favorites.has(p.id))
+        : providersWithDistance;
 
-    const filteredProviders = searchedProviders.sort((a, b) => (a.distance ?? Infinity) - (b.distance ?? Infinity));
+        const categoryFilteredProviders = (selectedCategory === 'all' 
+        ? baseProviders
+        : baseProviders.filter(p => p.categories.includes(selectedCategory))
+        );
 
+        const searchedProviders = searchQuery.trim() === ''
+        ? categoryFilteredProviders
+        : categoryFilteredProviders.filter(provider => {
+            const query = searchQuery.toLowerCase().trim();
+            
+            const nameMatch = provider.name.toLowerCase().includes(query);
+            const locationMatch = provider.location.toLowerCase().includes(query);
+            const serviceMatch = provider.services.some(service => service.toLowerCase().includes(query));
+            const descriptionMatch = provider.descriptions.some(desc => desc.text.toLowerCase().includes(query));
+            
+            return nameMatch || locationMatch || serviceMatch || descriptionMatch;
+        });
 
-    return (
-      <>
-        <Header searchQuery={searchQuery} onSearchQueryChange={setSearchQuery} />
-        <CategorySelector selectedCategory={selectedCategory} onSelectCategory={handleShowAll} />
-        
-        <main className="container mx-auto px-4 py-6 pb-24">
-          {locationError && !userLocation && (
-            <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4 rounded-md shadow" role="alert">
-              <p className="font-bold">Aviso de ubicación</p>
-              <p>{locationError}</p>
-            </div>
-          )}
-          {isLoading ? (
-            <div className="text-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-500 mx-auto"></div>
-              <p className="mt-4 text-slate-500">Buscando cuidadores...</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 gap-4">
-              {filteredProviders.length > 0 ? (
-                filteredProviders.map(provider => (
-                  <ProviderCard 
-                    key={provider.id} 
-                    provider={provider}
-                    isFavorite={favorites.has(provider.id)}
-                    onToggleFavorite={handleToggleFavorite}
-                    onViewProfile={handleViewProfile}
-                    currentCategory={selectedCategory}
-                  />
-                ))
-              ) : (
-                <div className="col-span-full text-center py-12">
-                  {view === 'favorites' ? (
-                    <>
-                      <p className="text-slate-500">Aún no tienes cuidadores favoritos.</p>
-                      <p className="text-slate-500 mt-1">Pulsa el corazón en un perfil para añadirlo.</p>
-                    </>
-                  ) : (
-                    <>
-                      <p className="text-slate-600 font-semibold text-lg">No se encontraron resultados</p>
-                      <p className="text-slate-500 mt-1">Prueba a cambiar los filtros o el término de búsqueda.</p>
-                    </>
-                  )}
-                </div>
-              )}
-            </div>
-          )}
-        </main>
-      </>
-    );
+        const filteredProviders = searchedProviders.sort((a, b) => (a.distance ?? Infinity) - (b.distance ?? Infinity));
+
+        if (view === 'favorites' && navigationContext === 'myProfile') {
+            return (
+                <>
+                    <PageHeader title="Favoritos" onBack={handleBackToProfile} />
+                    <main className="container mx-auto px-4 py-6 pb-24">
+                        {renderProviderGrid(filteredProviders, 'favorites')}
+                    </main>
+                </>
+            );
+        }
+
+        return (
+            <>
+                <Header searchQuery={searchQuery} onSearchQueryChange={setSearchQuery} />
+                <CategorySelector selectedCategory={selectedCategory} onSelectCategory={handleShowAll} />
+                
+                <main className="container mx-auto px-4 py-6 pb-24">
+                    {locationError && !userLocation && (
+                        <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4 rounded-md shadow" role="alert">
+                        <p className="font-bold">Aviso de ubicación</p>
+                        <p>{locationError}</p>
+                        </div>
+                    )}
+                    {renderProviderGrid(filteredProviders, view)}
+                </main>
+            </>
+        );
+    }
+
+    return null; // Should not be reached if all views are handled
   };
 
-  const showBottomNav = !['profile', 'chat', 'offer', 'prices', 'security', 'verification', 'help', 'about', 'blog', 'contact', 'settings', 'editProfile', 'securitySettings', 'notifications', 'legalInfo', 'legalDocument', 'myCaregiverProfile'].includes(view) && !isLocationLoading;
-  const showMainLayout = !['profile', 'chat', 'offer', 'map', 'settings', 'editProfile', 'securitySettings', 'notifications', 'legalInfo', 'legalDocument', 'myCaregiverProfile'].includes(view);
+  const showBottomNav = !['profile', 'chat', 'offer', 'booking', 'payment', 'confirmation', 'supportChat', 'supportEmail'].includes(view);
+  const showFooter = !['landing', 'providers', 'favorites', 'map', 'profile', 'chat', 'offer', 'myCaregiverProfile', 'editProfile', 'booking', 'payment', 'confirmation'].includes(view);
 
-  if (!showMainLayout) {
-    return (
-        <>
-            {renderContent()}
-            {showConfirmationModal && (
-                <ConfirmationModal
-                    {...confirmationModalConfig}
-                    onClose={handleCloseConfirmation}
-                />
-            )}
-        </>
-    );
-  }
 
   return (
-    <div className="bg-slate-50 text-slate-800 min-h-screen">
-      {renderContent()}
-      <Footer onNavigate={handleFooterNavigate} />
+    <div className="bg-slate-50 min-h-screen">
+      <div className={showBottomNav ? 'pb-24' : ''}>
+        {renderContent()}
+        {showFooter && <Footer onNavigate={handleFooterNavigate} />}
+      </div>
+
       {showBottomNav && (
-         <BottomNav 
+          <BottomNav 
             currentView={view as any} 
-            onNavigateHome={handleNavigateHome} 
+            onNavigateHome={handleNavigateHome}
             onNavigateFavorites={handleNavigateFavorites}
             onNavigateOffer={handleNavigateOffer}
             onNavigateInbox={handleNavigateInbox}
@@ -562,11 +649,12 @@ const App: React.FC = () => {
             unreadCount={unreadCount}
           />
       )}
+
       {showConfirmationModal && (
-          <ConfirmationModal
-              {...confirmationModalConfig}
-              onClose={handleCloseConfirmation}
-          />
+        <ConfirmationModal
+          {...confirmationModalConfig}
+          onClose={handleCloseConfirmation}
+        />
       )}
     </div>
   );

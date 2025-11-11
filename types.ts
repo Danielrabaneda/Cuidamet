@@ -1,4 +1,5 @@
 
+
 export enum CareCategory {
   ELDERLY = 'Elderly Care',
   CHILDREN = 'Child Care',
@@ -37,6 +38,7 @@ export interface Provider {
     longitude: number;
   };
   reviews: Review[];
+  badges?: string[];
 }
 
 export interface Message {
@@ -51,4 +53,16 @@ export interface ChatConversation {
   id: number;
   provider: Provider;
   messages: Message[];
+}
+
+// FIX: Added missing BookingDetails interface.
+export interface BookingDetails {
+  providerId: number;
+  date: string;
+  startTime: string;
+  endTime: string;
+  hours: number;
+  totalCost: number;
+  discountAmount: number;
+  insuranceCost: number;
 }

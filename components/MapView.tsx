@@ -84,6 +84,7 @@ const MapView: React.FC<MapViewProps> = ({
   });
   const [isMapInitialized, setIsMapInitialized] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [selectedMapCategory, setSelectedMapCategory] = useState<CareCategory | 'all'>('all');
 
   // Function to request user's location
   const handleRequestLocation = () => {
@@ -165,9 +166,13 @@ const MapView: React.FC<MapViewProps> = ({
             isUserLocation: true // Custom property to avoid removal
         }).addTo(mapRef.current).bindTooltip("Tu ubicación");
       }
+      
+      const filteredProviders = selectedMapCategory === 'all'
+          ? providers
+          : providers.filter(provider => provider.categories.includes(selectedMapCategory));
 
       // Add provider markers
-      providers.forEach(provider => {
+      filteredProviders.forEach(provider => {
         const color = getProviderColor(provider);
         const icon = createProviderIcon(provider, color);
         const marker = L.marker([provider.coordinates.latitude, provider.coordinates.longitude], { icon })
@@ -181,7 +186,7 @@ const MapView: React.FC<MapViewProps> = ({
       // Invalidate size to ensure map renders correctly after initial setup
       setTimeout(() => mapRef.current.invalidateSize(), 100);
     }
-  }, [isMapInitialized, providers, userLocation, onViewProfile]);
+  }, [isMapInitialized, providers, userLocation, onViewProfile, selectedMapCategory]);
 
   // Effect to invalidate map size when expanding/collapsing
   useEffect(() => {
@@ -253,39 +258,39 @@ const MapView: React.FC<MapViewProps> = ({
 
         <div ref={mapContainerRef} className="w-full flex-grow z-10" />
 
-        <footer className="p-4 border-t border-slate-200 flex-shrink-0 bg-gradient-to-t from-white to-slate-50/50">
-            <h3 className="text-center font-bold text-lg text-slate-800 mb-1">Descubre los Perfiles</h3>
-            <p className="text-center text-sm text-slate-500 mb-4">Cada color representa una especialidad. ¡Toca un pin para explorar!</p>
+        <footer className={`flex-shrink-0 bg-gradient-to-t from-white to-slate-50/50 transition-all duration-300 ease-in-out ${isExpanded ? 'max-h-32 overflow-y-auto p-4 pt-2 border-t border-slate-200' : 'max-h-[300px] overflow-hidden p-4 border-t border-slate-200'}`}>
+            <h3 className="text-center font-bold text-lg text-slate-800 mb-1">Filtra por Servicio</h3>
+            <p className="text-center text-sm text-slate-500 mb-4">Pulsa una categoría para ver solo esos cuidadores.</p>
             
             <div className="grid grid-cols-4 gap-3 text-center">
                 
-                <div>
-                    <div className="w-16 h-16 mx-auto rounded-2xl flex items-center justify-center transition-transform hover:scale-105" style={{ backgroundColor: categoryColors[CareCategory.ELDERLY], boxShadow: 'inset 3px 3px 6px rgba(255,255,255,0.4), inset -3px -3px 6px rgba(0,0,0,0.2), 2px 2px 5px rgba(0,0,0,0.1)' }}>
+                <button onClick={() => setSelectedMapCategory(CareCategory.ELDERLY)} className={`focus:outline-none rounded-xl focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-300 ${selectedMapCategory !== 'all' && selectedMapCategory !== CareCategory.ELDERLY ? 'opacity-50 hover:opacity-100' : 'opacity-100 scale-105'}`}>
+                    <div className="w-16 h-16 mx-auto rounded-2xl flex items-center justify-center" style={{ backgroundColor: categoryColors[CareCategory.ELDERLY], boxShadow: 'inset 3px 3px 6px rgba(255,255,255,0.4), inset -3px -3px 6px rgba(0,0,0,0.2), 2px 2px 5px rgba(0,0,0,0.1)' }}>
                         <ElderlyIcon className="w-8 h-8 text-white" style={{ filter: 'drop-shadow(1px 1px 2px rgba(0,0,0,0.3))' }} />
                     </div>
                     <p className="mt-2 text-xs font-semibold text-slate-700">Mayores</p>
-                </div>
+                </button>
 
-                <div>
-                    <div className="w-16 h-16 mx-auto rounded-2xl flex items-center justify-center transition-transform hover:scale-105" style={{ backgroundColor: categoryColors[CareCategory.CHILDREN], boxShadow: 'inset 3px 3px 6px rgba(255,255,255,0.4), inset -3px -3px 6px rgba(0,0,0,0.2), 2px 2px 5px rgba(0,0,0,0.1)' }}>
+                <button onClick={() => setSelectedMapCategory(CareCategory.CHILDREN)} className={`focus:outline-none rounded-xl focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 transition-all duration-300 ${selectedMapCategory !== 'all' && selectedMapCategory !== CareCategory.CHILDREN ? 'opacity-50 hover:opacity-100' : 'opacity-100 scale-105'}`}>
+                    <div className="w-16 h-16 mx-auto rounded-2xl flex items-center justify-center" style={{ backgroundColor: categoryColors[CareCategory.CHILDREN], boxShadow: 'inset 3px 3px 6px rgba(255,255,255,0.4), inset -3px -3px 6px rgba(0,0,0,0.2), 2px 2px 5px rgba(0,0,0,0.1)' }}>
                         <ChildIcon className="w-8 h-8 text-white" style={{ filter: 'drop-shadow(1px 1px 2px rgba(0,0,0,0.3))' }} />
                     </div>
                     <p className="mt-2 text-xs font-semibold text-slate-700">Niños</p>
-                </div>
+                </button>
                 
-                <div>
-                    <div className="w-16 h-16 mx-auto rounded-2xl flex items-center justify-center transition-transform hover:scale-105" style={{ backgroundColor: categoryColors[CareCategory.PETS], boxShadow: 'inset 3px 3px 6px rgba(255,255,255,0.4), inset -3px -3px 6px rgba(0,0,0,0.2), 2px 2px 5px rgba(0,0,0,0.1)' }}>
+                <button onClick={() => setSelectedMapCategory(CareCategory.PETS)} className={`focus:outline-none rounded-xl focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-300 ${selectedMapCategory !== 'all' && selectedMapCategory !== CareCategory.PETS ? 'opacity-50 hover:opacity-100' : 'opacity-100 scale-105'}`}>
+                    <div className="w-16 h-16 mx-auto rounded-2xl flex items-center justify-center" style={{ backgroundColor: categoryColors[CareCategory.PETS], boxShadow: 'inset 3px 3px 6px rgba(255,255,255,0.4), inset -3px -3px 6px rgba(0,0,0,0.2), 2px 2px 5px rgba(0,0,0,0.1)' }}>
                         <PetIcon className="w-8 h-8 text-white" style={{ filter: 'drop-shadow(1px 1px 2px rgba(0,0,0,0.3))' }} />
                     </div>
                     <p className="mt-2 text-xs font-semibold text-slate-700">Mascotas</p>
-                </div>
+                </button>
                 
-                <div>
-                    <div className="w-16 h-16 mx-auto rounded-2xl flex items-center justify-center transition-transform hover:scale-105" style={{ backgroundColor: categoryColors['multiple'], boxShadow: 'inset 3px 3px 6px rgba(255,255,255,0.4), inset -3px -3px 6px rgba(0,0,0,0.2), 2px 2px 5px rgba(0,0,0,0.1)' }}>
+                <button onClick={() => setSelectedMapCategory('all')} className={`focus:outline-none rounded-xl focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition-all duration-300 ${selectedMapCategory !== 'all' ? 'opacity-50 hover:opacity-100' : 'opacity-100 scale-105'}`}>
+                    <div className="w-16 h-16 mx-auto rounded-2xl flex items-center justify-center" style={{ backgroundColor: categoryColors['multiple'], boxShadow: 'inset 3px 3px 6px rgba(255,255,255,0.4), inset -3px -3px 6px rgba(0,0,0,0.2), 2px 2px 5px rgba(0,0,0,0.1)' }}>
                         <UsersIcon className="w-8 h-8 text-white" style={{ filter: 'drop-shadow(1px 1px 2px rgba(0,0,0,0.3))' }} />
                     </div>
-                    <p className="mt-2 text-xs font-semibold text-slate-700">Varios</p>
-                </div>
+                    <p className="mt-2 text-xs font-semibold text-slate-700">Todos</p>
+                </button>
 
             </div>
         </footer>

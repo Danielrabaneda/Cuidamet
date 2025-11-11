@@ -17,7 +17,7 @@ const Inbox: React.FC<InboxProps> = ({ chats, onViewChat }) => {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-4 pb-24">
+      <main className="container mx-auto px-4 py-4 pb-36">
         {chats.length > 0 ? (
           <ul className="divide-y divide-slate-200">
             {chats.map(chat => {

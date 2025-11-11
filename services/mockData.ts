@@ -8,8 +8,8 @@ export const MOCK_PROVIDERS: Provider[] = [
     categories: [CareCategory.ELDERLY, CareCategory.CHILDREN],
     coordinates: { latitude: 40.4168, longitude: -3.7038 },
     distance: 0,
-    rating: 4.7,
-    reviewsCount: 3,
+    rating: 4.9,
+    reviewsCount: 34,
     descriptions: [
       { category: CareCategory.ELDERLY, text: 'Como enfermera con 10 años de experiencia geriátrica, ofrezco cuidados médicos especializados, gestión de medicación y un trato compasivo.' },
       { category: CareCategory.CHILDREN, text: 'Con experiencia pediátrica, brindo un cuidado infantil seguro y estimulante. Paciente y profesional, creo un entorno de confianza para los más pequeños.' }
@@ -22,7 +22,8 @@ export const MOCK_PROVIDERS: Provider[] = [
         { id: 1, authorName: 'Lucía M.', authorPhotoUrl: 'https://images.unsplash.com/photo-1599566150163-29194dcaad36?q=80&w=200', rating: 5, comment: 'Ana es maravillosa. Mi madre la adora. Es puntual, profesional y muy cariñosa. Totalmente recomendable.', date: 'Hace 1 semana' },
         { id: 2, authorName: 'Javier P.', authorPhotoUrl: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=200', rating: 5, comment: 'Contraté a Ana para cuidar de mis hijos y no puedo estar más contento. Es creativa, responsable y los niños se lo pasan genial con ella.', date: 'Hace 3 semanas' },
         { id: 3, authorName: 'Carmen R.', authorPhotoUrl: 'https://images.unsplash.com/photo-1554151228-14d9def656e4?q=80&w=200', rating: 4, comment: 'Muy buena profesional, aunque a veces es un poco difícil contactar con ella por la alta demanda que tiene. Por lo demás, todo perfecto.', date: 'Hace 1 mes' }
-    ]
+    ],
+    badges: ['Mejor Valorado', 'Respuesta Rápida']
   },
   {
     id: 2,
@@ -32,7 +33,7 @@ export const MOCK_PROVIDERS: Provider[] = [
     coordinates: { latitude: 40.4339, longitude: -3.7035 },
     distance: 0,
     rating: 4.5,
-    reviewsCount: 2,
+    reviewsCount: 18,
     descriptions: [
       { category: CareCategory.CHILDREN, text: 'Educador infantil certificado. Me encanta crear actividades divertidas y educativas que fomenten el desarrollo de los más pequeños. ¡La seguridad es mi prioridad!' }
     ],
@@ -53,7 +54,7 @@ export const MOCK_PROVIDERS: Provider[] = [
     coordinates: { latitude: 40.4154, longitude: -3.6844 },
     distance: 0,
     rating: 5.0,
-    reviewsCount: 2,
+    reviewsCount: 42,
     descriptions: [
       { category: CareCategory.PETS, text: 'Técnica veterinaria y amante de los animales de toda la vida. Especializada en paseos de perros, cuidado a domicilio y administración de medicamentos.' }
     ],
@@ -64,7 +65,8 @@ export const MOCK_PROVIDERS: Provider[] = [
     reviews: [
       { id: 6, authorName: 'Marta V.', authorPhotoUrl: 'https://images.unsplash.com/photo-1607746882042-944635dfe10e?q=80&w=200', rating: 5, comment: 'Laura es la mejor cuidadora que podría desear para mis dos perros. Se nota que le apasionan los animales y ellos la adoran. Confianza 100%.', date: 'Hace 5 días' },
       { id: 7, authorName: 'Sergio L.', authorPhotoUrl: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=200', rating: 5, comment: 'Impecable. Cuidó de mi gato mientras estaba de vacaciones y me mantuvo informado con fotos todos los días. Un servicio de 10.', date: 'Hace 1 mes' }
-    ]
+    ],
+    badges: ['Experta en Mascotas']
   },
   {
     id: 4,
@@ -74,7 +76,7 @@ export const MOCK_PROVIDERS: Provider[] = [
     coordinates: { latitude: 40.4284, longitude: -3.6778 },
     distance: 0,
     rating: 4.0,
-    reviewsCount: 1,
+    reviewsCount: 8,
     descriptions: [
       { category: CareCategory.ELDERLY, text: 'Cuidador amable y responsable, enfocado en proporcionar una excelente compañía y asistencia en las tareas diarias para mejorar la calidad de vida de las personas mayores.' }
     ],
@@ -94,7 +96,7 @@ export const MOCK_PROVIDERS: Provider[] = [
     coordinates: { latitude: 40.3995, longitude: -3.7022 },
     distance: 0,
     rating: 4.8,
-    reviewsCount: 2,
+    reviewsCount: 25,
     descriptions: [
       { category: CareCategory.CHILDREN, text: 'Estudiante de pedagogía con amplia experiencia en el cuidado de niños de todas las edades. Certificada en RCP y primeros auxilios. Creativa y muy paciente.' }
     ],
@@ -105,7 +107,8 @@ export const MOCK_PROVIDERS: Provider[] = [
     reviews: [
       { id: 9, authorName: 'Pablo N.', authorPhotoUrl: 'https://images.unsplash.com/photo-1527980965255-d3b416303d12?q=80&w=200', rating: 5, comment: 'Sofía es una canguro excepcional. Mis hijos la adoran. Es puntual, responsable y siempre viene con ideas de juegos nuevos.', date: 'Hace 3 semanas' },
       { id: 10, authorName: 'Cristina A.', authorPhotoUrl: 'https://images.unsplash.com/photo-1521119989659-a83eee488004?q=80&w=200', rating: 4.5, comment: 'Muy contentos con Sofía. Nos ha salvado en más de una ocasión con poca antelación. Muy profesional.', date: 'Hace 1 mes' },
-    ]
+    ],
+    badges: ['Mejor Valorado']
   },
   {
     id: 6,
@@ -115,7 +118,7 @@ export const MOCK_PROVIDERS: Provider[] = [
     coordinates: { latitude: 40.4337, longitude: -3.7155 },
     distance: 0,
     rating: 4.5,
-    reviewsCount: 2,
+    reviewsCount: 15,
     descriptions: [
       { category: CareCategory.PETS, text: 'Amante de los animales, ofrezco paseos largos y alojamiento en un hogar con jardín. Tu mascota estará en las mejores manos.' },
       { category: CareCategory.ELDERLY, text: 'Ofrezco compañía y asistencia en tareas diarias para personas mayores. Soy responsable, puntual y tengo una gran capacidad de escucha.' }
@@ -137,7 +140,7 @@ export const MOCK_PROVIDERS: Provider[] = [
     coordinates: { latitude: 40.4005, longitude: -3.7441 },
     distance: 0,
     rating: 4.8,
-    reviewsCount: 2,
+    reviewsCount: 22,
     descriptions: [
         { category: CareCategory.ELDERLY, text: 'Dedicada a ayudar a las personas mayores a vivir de forma cómoda e independiente en su propio hogar. Cuento con formación específica en movilización y cuidado personal.' }
     ],
@@ -148,7 +151,8 @@ export const MOCK_PROVIDERS: Provider[] = [
     reviews: [
         { id: 13, authorName: 'Sonia H.', authorPhotoUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=200', rating: 5, comment: 'Isabel es una profesional excepcional. Su ayuda con mi abuela ha sido inestimable. Su trato es humano y cercano, y técnicamente es impecable.', date: 'Hace 2 semanas' },
         { id: 14, authorName: 'Andrés V.', authorPhotoUrl: 'https://images.unsplash.com/photo-1528892952291-009c663ce843?q=80&w=200', rating: 4.5, comment: 'Muy contentos con el servicio. Isabel es muy organizada y prepara comidas muy saludables.', date: 'Hace 1 mes' },
-    ]
+    ],
+    badges: ['Experta en Mayores']
   },
   {
     id: 8,
@@ -158,7 +162,7 @@ export const MOCK_PROVIDERS: Provider[] = [
     coordinates: { latitude: 40.4190, longitude: -3.7010 },
     distance: 0,
     rating: 5.0,
-    reviewsCount: 1,
+    reviewsCount: 11,
     descriptions: [
         { category: CareCategory.CHILDREN, text: 'Padre de dos hijos con pasión por el cuidado infantil. Disponible los fines de semana. Me encanta organizar actividades deportivas y al aire libre.' }
     ],
@@ -178,7 +182,7 @@ export const MOCK_PROVIDERS: Provider[] = [
     coordinates: { latitude: 37.9838, longitude: -1.1307 },
     distance: 0,
     rating: 4.9,
-    reviewsCount: 2,
+    reviewsCount: 28,
     descriptions: [
         { category: CareCategory.ELDERLY, text: 'Auxiliar de geriatría con más de 15 años de experiencia. Ofrezco un cuidado integral, desde la higiene personal hasta la preparación de dietas específicas y acompañamiento a citas médicas. Mi prioridad es el bienestar y la dignidad de la persona.' }
     ],
@@ -189,7 +193,8 @@ export const MOCK_PROVIDERS: Provider[] = [
     reviews: [
         { id: 16, authorName: 'Familia Sánchez', authorPhotoUrl: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=200', rating: 5, comment: 'Estamos encantados con Mª Dolores. Es una profesional increíble y trata a mi padre con un cariño excepcional. La recomendamos 100%.', date: 'Hace 2 semanas' },
         { id: 17, authorName: 'Pedro G.', authorPhotoUrl: 'https://images.unsplash.com/photo-1521119989659-a83eee488004?q=80&w=200', rating: 4.8, comment: 'Muy responsable y atenta. Se encarga de toda la medicación sin un solo fallo.', date: 'Hace 1 mes' }
-    ]
+    ],
+    badges: ['Mejor Valorado']
   },
   {
     id: 10,
@@ -199,7 +204,7 @@ export const MOCK_PROVIDERS: Provider[] = [
     coordinates: { latitude: 37.9734, longitude: -1.2185 },
     distance: 0,
     rating: 4.6,
-    reviewsCount: 2,
+    reviewsCount: 19,
     descriptions: [
         { category: CareCategory.CHILDREN, text: 'Monitor de ocio y tiempo libre. Me encanta organizar juegos y talleres para los niños. También puedo ayudar con los deberes.' },
         { category: CareCategory.PETS, text: 'Gran amante de los perros. Ofrezco paseos largos por la zona del río y mucho juego para que gasten energía.' }
@@ -221,7 +226,7 @@ export const MOCK_PROVIDERS: Provider[] = [
     coordinates: { latitude: 37.9790, longitude: -1.1332 },
     distance: 0,
     rating: 5.0,
-    reviewsCount: 1,
+    reviewsCount: 31,
     descriptions: [
         { category: CareCategory.PETS, text: 'Voluntaria en protectoras de animales. Ofrezco cuidado a domicilio para gatos y otros animales pequeños. Experiencia con medicación oral.' }
     ],
@@ -231,7 +236,8 @@ export const MOCK_PROVIDERS: Provider[] = [
     verifications: ['DNI Verificado', 'Referencias de Protectora'],
     reviews: [
         { id: 20, authorName: 'Elena V.', authorPhotoUrl: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=200', rating: 5, comment: 'Carmen es un amor con los animales. Cuidó de mi gata como si fuera suya, mandándome fotos todos los días. ¡Totalmente de fiar!', date: 'Hace 1 semana' }
-    ]
+    ],
+    badges: ['Experta en Mascotas']
   },
   {
     id: 12,
@@ -241,7 +247,7 @@ export const MOCK_PROVIDERS: Provider[] = [
     coordinates: { latitude: 37.9750, longitude: -1.2200 },
     distance: 0,
     rating: 4.7,
-    reviewsCount: 1,
+    reviewsCount: 14,
     descriptions: [
         { category: CareCategory.ELDERLY, text: 'Ofrezco servicio de acompañamiento y recados para personas mayores. Soy una persona paciente y un buen conversador.' },
         { category: CareCategory.CHILDREN, text: 'Puedo recoger a los niños del colegio y llevarlos a actividades extraescolares. Tengo vehículo propio.' }

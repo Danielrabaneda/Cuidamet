@@ -22,7 +22,7 @@ const NotificationsPage: React.FC<NotificationsPageProps> = ({ onBack }) => {
   return (
     <div className="bg-slate-50 min-h-screen">
       <PageHeader title="Notificaciones" onBack={onBack} />
-      <main className="container mx-auto px-4 py-6">
+      <main className="container mx-auto px-4 py-6 pb-36">
         
         <div className="text-center mb-8">
             <div className="inline-block bg-teal-100 p-4 rounded-full">

@@ -59,6 +59,29 @@ export const legalDocuments: LegalDocument[] = [
       </>
     ),
   },
+   {
+    id: 'cancellation',
+    title: 'Política de Cancelación y Reembolso',
+    description: 'Condiciones de cancelación para clientes y cuidadores.',
+    content: (
+      <>
+        <h2>Cancelación por el cliente</h2>
+        <ul>
+            <li><strong>Más de 48h antes del servicio:</strong> Reembolso del 100% del importe, menos una comisión de procesamiento fija de 2€.</li>
+            <li><strong>Entre 24 y 48h antes del servicio:</strong> Reembolso del 50% del importe total. El 50% restante se abona al cuidador como compensación.</li>
+            <li><strong>Menos de 24h antes del servicio:</strong> Sin reembolso. El importe total se abona al cuidador como compensación por la reserva a corto plazo.</li>
+            <li><strong>Emergencia médica justificada:</strong> Se realizará un reembolso del 100% (menos la comisión de 2€) siempre que se presente un justificante médico válido.</li>
+        </ul>
+
+        <h2>Cancelación por el cuidador</h2>
+        <ul>
+            <li><strong>Más de 48h antes del servicio:</strong> Sin penalización. El cliente recibe un reembolso completo y es notificado para buscar una alternativa.</li>
+            <li><strong>Menos de 48h antes del servicio:</strong> Se aplica una penalización en la cuenta del cuidador que afectará a su visibilidad en búsquedas futuras. El cliente es notificado inmediatamente para buscar una alternativa y recibe un reembolso completo.</li>
+            <li><strong>Reincidencia en cancelaciones:</strong> La cancelación recurrente con poca antelación puede llevar a la suspensión temporal de la cuenta del cuidador.</li>
+        </ul>
+      </>
+    ),
+  },
   {
     id: 'cookies',
     title: 'Política de Cookies',
