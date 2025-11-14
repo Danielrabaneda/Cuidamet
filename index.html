@@ -78,6 +78,39 @@
     .custom-marker-pin.selected .pin-pointer {
         border-top-color: #f59e0b; /* amber-500 */
     }
+    /* Styles for user location marker */
+    .user-location-marker {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background-color: rgba(0, 122, 255, 0.2);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        animation: pulse 2s infinite;
+    }
+    .user-location-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background-color: #007AFF;
+        border: 2px solid white;
+        box-shadow: 0 0 5px rgba(0,0,0,0.3);
+    }
+    @keyframes pulse {
+        0% {
+            transform: scale(0.95);
+            box-shadow: 0 0 0 0 rgba(0, 122, 255, 0.7);
+        }
+        70% {
+            transform: scale(1);
+            box-shadow: 0 0 0 10px rgba(0, 122, 255, 0);
+        }
+        100% {
+            transform: scale(0.95);
+            box-shadow: 0 0 0 0 rgba(0, 122, 255, 0);
+        }
+    }
     /* For smooth animations */
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(-10px); }

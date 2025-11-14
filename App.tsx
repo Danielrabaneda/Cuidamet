@@ -112,6 +112,29 @@ const App: React.FC = () => {
     }
   }, []);
 
+  const handleRequestLocation = () => {
+    if (!navigator.geolocation) {
+      setLocationError("La geolocalización no es compatible con tu navegador.");
+      return;
+    }
+    setIsLocationLoading(true);
+    setLocationError(null);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setUserLocation({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+        });
+        setIsLocationLoading(false);
+      },
+      (error) => {
+        setLocationError("No se pudo obtener tu ubicación. Activa los permisos.");
+        setIsLocationLoading(false);
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
+  };
+
   const unreadCount = chats.reduce((count, chat) => {
     return count + chat.messages.filter(m => m.sender === 'other' && !m.read).length;
   }, 0);
@@ -431,12 +454,10 @@ const App: React.FC = () => {
       return <MapView 
         providers={providersWithDistance} 
         userLocation={userLocation}
-        locationError={locationError}
         onViewProfile={handleViewProfile} 
-        onBack={handleNavigateHome}
-        onLocationUpdate={setUserLocation}
-        onLocationLoading={setIsLocationLoading}
-        onLocationError={setLocationError}
+        onBack={() => setView('landing')}
+        onRequestLocation={handleRequestLocation}
+        isLocationLoading={isLocationLoading}
       />;
     }
 
@@ -627,13 +648,14 @@ const App: React.FC = () => {
     return null; // Should not be reached if all views are handled
   };
 
-  const showBottomNav = !['profile', 'chat', 'offer', 'booking', 'payment', 'confirmation', 'supportChat', 'supportEmail'].includes(view);
-  const showFooter = !['landing', 'providers', 'favorites', 'map', 'profile', 'chat', 'offer', 'myCaregiverProfile', 'editProfile', 'booking', 'payment', 'confirmation'].includes(view);
+  const isFullScreenView = ['map', 'profile', 'chat', 'offer', 'booking', 'payment', 'confirmation', 'supportChat', 'supportEmail'].includes(view);
+  const showBottomNav = !isFullScreenView;
+  const showFooter = !['landing', 'providers', 'favorites', 'myProfile', 'inbox', ...isFullScreenView ? ['map', 'profile', 'chat', 'offer', 'booking', 'payment', 'confirmation', 'supportChat', 'supportEmail'] : []].includes(view) && !isFullScreenView;
 
 
   return (
     <div className="bg-slate-50 min-h-screen">
-      <div className={showBottomNav ? 'pb-24' : ''}>
+       <div className={showBottomNav ? 'pb-24' : ''}>
         {renderContent()}
         {showFooter && <Footer onNavigate={handleFooterNavigate} />}
       </div>

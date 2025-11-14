@@ -1,15 +1,24 @@
 
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { Provider, CareCategory } from '../types';
+import ProfileDetail from './ProfileDetail'; // To show full details
+
+// Icons
 import ChevronLeftIcon from './icons/ChevronLeftIcon';
-import MapPinIcon from './icons/MapPinIcon';
-import ArrowsPointingOutIcon from './icons/ArrowsPointingOutIcon';
-import ArrowsPointingInIcon from './icons/ArrowsPointingInIcon';
+import XMarkIcon from './icons/XMarkIcon';
+import LayersIcon from './icons/LayersIcon';
+import GpsFixedIcon from './icons/GpsFixedIcon';
+import BookmarkIcon from './icons/BookmarkIcon';
+import ShareIcon from './icons/ShareIcon';
+import DirectionsIcon from './icons/DirectionsIcon';
+import PlayIcon from './icons/PlayIcon';
+import StorefrontIcon from './icons/StorefrontIcon';
+import QueueListIcon from './icons/QueueListIcon';
 import ElderlyIcon from './icons/ElderlyIcon';
 import ChildIcon from './icons/ChildIcon';
 import PetIcon from './icons/PetIcon';
-import UsersIcon from './icons/UsersIcon';
+import UserCircleIcon from './icons/UserCircleIcon';
 
 
 // This is a global from the script tag in index.html
@@ -18,36 +27,26 @@ declare var L: any;
 interface MapViewProps {
   providers: Provider[];
   userLocation: { latitude: number; longitude: number } | null;
-  locationError: string | null;
   onViewProfile: (providerId: number) => void;
   onBack: () => void;
-  onLocationUpdate: (location: { latitude: number; longitude: number } | null) => void;
-  onLocationLoading: (isLoading: boolean) => void;
-  onLocationError: (error: string | null) => void;
+  onRequestLocation: () => void;
+  isLocationLoading: boolean;
 }
 
-// Color scheme for categories
-const categoryColors = {
-  [CareCategory.ELDERLY]: '#3b82f6', // blue-500
-  [CareCategory.CHILDREN]: '#f59e0b', // amber-500
-  [CareCategory.PETS]: '#22c55e', // green-500
-  'multiple': '#14b8a6', // teal-500
+const categoryStyles: Record<CareCategory, { color: string, name: string, icon: React.ReactElement }> = {
+    [CareCategory.ELDERLY]: { color: 'teal', name: 'Mayores', icon: <ElderlyIcon className="w-5 h-5" /> },
+    [CareCategory.CHILDREN]: { color: 'amber', name: 'Niños', icon: <ChildIcon className="w-5 h-5" /> },
+    [CareCategory.PETS]: { color: 'green', name: 'Mascotas', icon: <PetIcon className="w-5 h-5" /> },
 };
 
-// New function to get provider color
-const getProviderColor = (provider: Provider): string => {
-  if (provider.categories.length === 1) {
-    return categoryColors[provider.categories[0]] || categoryColors['multiple'];
-  }
-  return categoryColors['multiple'];
-};
+const createProviderIcon = (provider: Provider) => {
+    const primaryCategory = provider.categories[0] || CareCategory.ELDERLY;
+    const color = categoryStyles[primaryCategory]?.color || 'teal';
+    const hexColor = { teal: '#14b8a6', amber: '#f59e0b', green: '#22c55e' }[color] || '#14b8a6';
 
-
-// Custom DivIcon for Leaflet markers
-const createProviderIcon = (provider: Provider, color: string) => {
     return L.divIcon({
         html: `
-            <div class="custom-marker-pin" style="--marker-color: ${color};">
+            <div class="custom-marker-pin" style="--marker-color: ${hexColor};">
                 <div class="pin-body">
                     <img src="${provider.photoUrl}" alt="${provider.name}" />
                 </div>
@@ -61,239 +60,273 @@ const createProviderIcon = (provider: Provider, color: string) => {
     });
 };
 
-
-const MapView: React.FC<MapViewProps> = ({ 
-    providers, 
-    userLocation, 
-    locationError,
-    onViewProfile, 
-    onBack,
-    onLocationUpdate,
-    onLocationLoading,
-    onLocationError
-}) => {
+const MapView: React.FC<MapViewProps> = ({ providers, userLocation, onViewProfile, onBack, onRequestLocation, isLocationLoading }) => {
   const mapRef = useRef<any>(null);
   const mapContainerRef = useRef<HTMLDivElement>(null);
-  const [mapStatus, setMapStatus] = useState<'requesting' | 'loading' | 'ready' | 'error'>(() => {
-    // If we already have location OR we've already tried and got an error, go straight to the map.
-    if (userLocation || locationError) {
-      return 'ready';
-    }
-    // Otherwise, it's the first time, so request permission.
-    return 'requesting';
-  });
-  const [isMapInitialized, setIsMapInitialized] = useState(false);
-  const [isExpanded, setIsExpanded] = useState(false);
-  const [selectedMapCategory, setSelectedMapCategory] = useState<CareCategory | 'all'>('all');
-
-  // Function to request user's location
-  const handleRequestLocation = () => {
-    setMapStatus('loading');
-    onLocationLoading(true);
-    onLocationError(null);
-
-    if (!navigator.geolocation) {
-        onLocationError("La geolocalización no es compatible con tu navegador. Mostrando una ubicación por defecto.");
-        onLocationUpdate(null);
-        onLocationLoading(false);
-        setMapStatus('ready'); // Proceed with default location
-        return;
-    }
-
-    navigator.geolocation.getCurrentPosition(
-        (position) => {
-            onLocationUpdate({
-                latitude: position.coords.latitude,
-                longitude: position.coords.longitude,
-            });
-            onLocationLoading(false);
-            setMapStatus('ready');
-        },
-        (error) => {
-            let errorMsg = "No se pudo obtener tu ubicación. Por favor, revisa los permisos del navegador.";
-            if (error.code === error.PERMISSION_DENIED) {
-                errorMsg = "Permiso de ubicación denegado. Mostrando una ubicación por defecto.";
-            }
-            onLocationError(errorMsg);
-            onLocationUpdate(null); // Clear location
-            onLocationLoading(false);
-            setMapStatus('ready'); // Still proceed to show map with default location
-        },
-        { timeout: 10000 }
-    );
-  };
+  const markersRef = useRef<{ [providerId: string]: any }>({});
+  const userLocationMarkerRef = useRef<any>(null);
+  const firstLocationUpdate = useRef(true);
   
-  // Effect to initialize the map once we are in the 'ready' state
-  useEffect(() => {
-    if (mapStatus === 'ready' && mapContainerRef.current && !isMapInitialized) {
-      // Default to Madrid if no user location
-      const mapCenter: [number, number] = userLocation
-        ? [userLocation.latitude, userLocation.longitude]
-        : [40.4168, -3.7038];
+  const [isMapInitialized, setIsMapInitialized] = useState(false);
+  const [selectedProvider, setSelectedProvider] = useState<Provider | null>(null);
+  const [sheetState, setSheetState] = useState<'hidden' | 'partial' | 'full'>('hidden');
+  const [mapCategoryFilter, setMapCategoryFilter] = useState<CareCategory | 'all'>('all');
 
-      const map = L.map(mapContainerRef.current, { zoomControl: false }).setView(mapCenter, 13);
+  // Unified Sheet Logic
+  const sheetRef = useRef<HTMLDivElement>(null);
+  const sheetContentRef = useRef<HTMLDivElement>(null);
+
+  const filterButtons = [
+    { id: 'all', name: 'Todos', icon: <QueueListIcon className="w-6 h-6"/>, style: 'bg-slate-800 text-white' },
+    { id: CareCategory.ELDERLY, name: 'Mayores', icon: <ElderlyIcon className="w-6 h-6" />, style: 'bg-teal-500 text-white' },
+    { id: CareCategory.CHILDREN, name: 'Niños', icon: <ChildIcon className="w-6 h-6" />, style: 'bg-amber-500 text-white' },
+    { id: CareCategory.PETS, name: 'Mascotas', icon: <PetIcon className="w-6 h-6" />, style: 'bg-green-500 text-white' },
+  ];
+
+  useEffect(() => {
+    if (mapContainerRef.current && !isMapInitialized) {
+      const mapCenter: [number, number] = [37.9796, -1.1578];
+      const map = L.map(mapContainerRef.current, { zoomControl: false }).setView(mapCenter, 14);
       mapRef.current = map;
 
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; OpenStreetMap contributors'
       }).addTo(map);
 
-      // Add zoom controls to the top right
-      L.control.zoom({ position: 'topright' }).addTo(map);
-
       setIsMapInitialized(true);
+      setSheetState('partial'); // Show location sheet on load
+      onRequestLocation();
     }
-  }, [mapStatus, userLocation, isMapInitialized]);
-
-  // Effect to add/update markers when providers or map initialization changes
+  }, [isMapInitialized, onRequestLocation]);
+  
   useEffect(() => {
-    if (isMapInitialized && mapRef.current) {
-        // Clear existing provider markers to avoid duplicates on re-render
-        mapRef.current.eachLayer((layer: any) => {
-            if (layer.options && (layer.options.pane === 'markerPane' || layer.options.pane === 'shadowPane') && !layer.options.isUserLocation) {
-                 mapRef.current.removeLayer(layer);
-            }
+    if (!isMapInitialized || !mapRef.current) return;
+
+    if (userLocation) {
+        const userIcon = L.divIcon({
+            html: `<div class="user-location-marker"><div class="user-location-dot"></div></div>`,
+            className: '',
+            iconSize: [24, 24],
+            iconAnchor: [12, 12],
         });
 
-      // Add user location marker
-      if (userLocation) {
-        L.circleMarker([userLocation.latitude, userLocation.longitude], {
-            radius: 8,
-            color: '#ffffff',
-            weight: 2,
-            fillColor: '#0ea5e9', // sky-500
-            fillOpacity: 1,
-            isUserLocation: true // Custom property to avoid removal
-        }).addTo(mapRef.current).bindTooltip("Tu ubicación");
+        if (userLocationMarkerRef.current) {
+            userLocationMarkerRef.current.setLatLng([userLocation.latitude, userLocation.longitude]);
+        } else {
+            userLocationMarkerRef.current = L.marker([userLocation.latitude, userLocation.longitude], { icon: userIcon, zIndexOffset: -100 }).addTo(mapRef.current);
+        }
+
+        if (firstLocationUpdate.current) {
+            mapRef.current.flyTo([userLocation.latitude, userLocation.longitude], 16, { duration: 1 });
+            firstLocationUpdate.current = false;
+        }
+    }
+  }, [isMapInitialized, userLocation]);
+
+  const handleRecenter = () => {
+      onRequestLocation();
+      if (userLocation && mapRef.current) {
+          mapRef.current.flyTo([userLocation.latitude, userLocation.longitude], 16, { duration: 1 });
       }
-      
-      const filteredProviders = selectedMapCategory === 'all'
-          ? providers
-          : providers.filter(provider => provider.categories.includes(selectedMapCategory));
+  };
 
-      // Add provider markers
-      filteredProviders.forEach(provider => {
-        const color = getProviderColor(provider);
-        const icon = createProviderIcon(provider, color);
-        const marker = L.marker([provider.coordinates.latitude, provider.coordinates.longitude], { icon })
-          .addTo(mapRef.current)
-          .bindTooltip(provider.name, { direction: 'top' })
-          .on('click', () => {
-            onViewProfile(provider.id);
-          });
-      });
-      
-      // Invalidate size to ensure map renders correctly after initial setup
-      setTimeout(() => mapRef.current.invalidateSize(), 100);
+
+  const handleMarkerClick = useCallback((provider: Provider) => {
+    setSelectedProvider(provider);
+    setSheetState('partial');
+    if (mapRef.current) {
+        mapRef.current.flyTo([provider.coordinates.latitude - 0.008, provider.coordinates.longitude], 15, { duration: 0.5 });
     }
-  }, [isMapInitialized, providers, userLocation, onViewProfile, selectedMapCategory]);
+    
+    document.querySelectorAll('.custom-marker-pin.selected').forEach(el => el.classList.remove('selected'));
+    const markerElement = (markersRef.current[provider.id] as any)?._icon;
+    if (markerElement) {
+        markerElement.querySelector('.custom-marker-pin')?.classList.add('selected');
+    }
 
-  // Effect to invalidate map size when expanding/collapsing
+  }, []);
+
   useEffect(() => {
-    if (isMapInitialized && mapRef.current) {
-      const timer = setTimeout(() => {
-        mapRef.current.invalidateSize();
-      }, 350); // Slightly longer than the CSS transition duration
-      return () => clearTimeout(timer);
+    if (!isMapInitialized || !mapRef.current) return;
+    
+    const providerIds = new Set(providers.map(p => p.id));
+    Object.keys(markersRef.current).forEach(id => {
+        if (!providerIds.has(Number(id))) {
+            mapRef.current.removeLayer(markersRef.current[id]);
+            delete markersRef.current[id];
+        }
+    });
+
+    providers.forEach(provider => {
+        if (!markersRef.current[provider.id]) {
+            const icon = createProviderIcon(provider);
+            const marker = L.marker([provider.coordinates.latitude, provider.coordinates.longitude], { icon, riseOnHover: true })
+                .on('click', () => handleMarkerClick(provider));
+            markersRef.current[provider.id] = marker;
+        }
+    });
+  }, [isMapInitialized, providers, handleMarkerClick]);
+  
+  useEffect(() => {
+    if (!isMapInitialized || !mapRef.current) return;
+    
+    Object.entries(markersRef.current).forEach(([id, marker]) => {
+      const provider = providers.find(p => p.id === Number(id));
+      if (!provider) return;
+      
+      const shouldBeVisible = mapCategoryFilter === 'all' || provider.categories.includes(mapCategoryFilter as CareCategory);
+      
+      if (shouldBeVisible) {
+        if (!mapRef.current.hasLayer(marker)) (marker as any).addTo(mapRef.current);
+      } else {
+        if (mapRef.current.hasLayer(marker)) mapRef.current.removeLayer(marker);
+      }
+    });
+  }, [mapCategoryFilter, providers, isMapInitialized]);
+
+
+  const handleSheetClose = () => {
+    setSheetState('partial');
+    setSelectedProvider(null);
+    document.querySelectorAll('.custom-marker-pin.selected').forEach(el => el.classList.remove('selected'));
+  };
+  
+  const toggleSheetState = () => {
+      if (!selectedProvider) return; // Only allow expanding for provider profiles
+      if (sheetContentRef.current) sheetContentRef.current.scrollTop = 0;
+      setSheetState(prev => (prev === 'full' ? 'partial' : 'full'));
+  };
+
+  const getSheetTransform = () => {
+    const isProvider = !!selectedProvider;
+    const partialHeight = isProvider ? 280 : 210;
+    const fullHeight = isProvider ? (window.innerHeight - 80) : partialHeight; // Location sheet doesn't expand
+
+    switch (sheetState) {
+        case 'full': return `translateY(calc(100vh - ${fullHeight}px))`;
+        case 'partial': return `translateY(calc(100vh - ${partialHeight}px))`;
+        default: return 'translateY(100vh)';
     }
-  }, [isExpanded, isMapInitialized]);
+  };
+  
+  const handleCategoryFilterChange = (category: CareCategory | 'all') => {
+      setMapCategoryFilter(prev => (prev === category ? 'all' : category));
+      if (selectedProvider) handleSheetClose();
+  };
 
-
-  if (mapStatus === 'requesting') {
-    return (
-        <div className="fixed inset-0 bg-slate-100/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-8 text-center animate-fade-in">
-                <MapPinIcon className="w-24 h-24 text-teal-500 mb-6 mx-auto" />
-                <h1 className="text-2xl font-bold text-slate-800">Encuentra cuidadores cerca de ti</h1>
-                <p className="text-slate-600 mt-2 max-w-sm mx-auto">Para mostrarte los cuidadores más cercanos, necesitamos acceder a tu ubicación. Tu ubicación solo se usará para esta búsqueda.</p>
-                <button
-                    onClick={handleRequestLocation}
-                    className="mt-8 bg-gradient-to-r from-teal-500 to-green-500 text-white px-8 py-3 rounded-xl font-bold text-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 w-full hover:shadow-lg hover:-translate-y-0.5"
-                >
-                    Permitir acceso a la ubicación
-                </button>
-                <button onClick={onBack} className="mt-4 text-slate-500 font-medium hover:text-slate-700 w-full py-2">
-                    Volver
-                </button>
-            </div>
-        </div>
-    );
-  }
-
-  if (mapStatus === 'loading') {
-    return (
-      <div className="fixed inset-0 bg-slate-100/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-8 text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-500 mx-auto"></div>
-            <p className="mt-4 text-slate-500">Obteniendo tu ubicación...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
-    <div className={`fixed inset-0 bg-slate-100/70 backdrop-blur-sm z-50 flex items-center justify-center animate-fade-in transition-padding duration-300 ${isExpanded ? 'p-2 sm:p-4' : 'p-4'}`}>
-      <div className={`bg-white rounded-2xl shadow-xl flex flex-col overflow-hidden transition-all duration-300 ${isExpanded ? 'w-full h-full' : 'w-full max-w-lg h-[90vh] max-h-[700px]'}`}>
-        
-        <header className="p-4 border-b border-slate-200 flex-shrink-0">
-            <div className="flex items-center justify-between mb-2">
-                 <div className="flex items-center">
-                    <button onClick={onBack} className="p-2 -ml-2 text-slate-600 hover:text-teal-500 rounded-full hover:bg-slate-100 transition-colors">
-                    <ChevronLeftIcon className="w-6 h-6" />
-                    </button>
-                    <h1 className="text-xl font-bold ml-2 bg-gradient-to-r from-teal-500 to-green-500 text-transparent bg-clip-text">Explora en el Mapa</h1>
+    <div className="w-screen h-screen overflow-hidden relative bg-slate-200">
+      <div className="hidden bg-teal-100 bg-amber-100 bg-green-100 bg-teal-500 bg-amber-500 bg-green-500"></div>
+
+      <div ref={mapContainerRef} className="w-full h-full z-0" />
+      
+      <div className="absolute top-0 left-0 right-0 p-4 z-10 pointer-events-none">
+          <div className="relative bg-white rounded-full shadow-lg flex items-center pointer-events-auto max-w-lg mx-auto">
+              <button onClick={onBack} className="p-3 text-slate-500 hover:text-teal-500">
+                  <ChevronLeftIcon className="w-6 h-6" />
+              </button>
+              <input type="text" placeholder="Buscar una dirección..." className="w-full h-full bg-transparent py-3 focus:outline-none text-slate-800 placeholder:text-slate-400" />
+              <button className="p-3 text-slate-500 hover:text-slate-800">
+                  <XMarkIcon className="w-6 h-6" />
+              </button>
+          </div>
+      </div>
+
+      <div className="absolute top-20 right-4 z-10 space-y-3 pointer-events-none">
+          <button className="bg-white rounded-full shadow-lg p-3 block ml-auto pointer-events-auto"><LayersIcon className="w-6 h-6 text-slate-700"/></button>
+          <button onClick={handleRecenter} className="bg-white rounded-full shadow-lg p-3 block ml-auto pointer-events-auto">
+            <GpsFixedIcon className={`w-6 h-6 text-slate-700 ${isLocationLoading ? 'animate-spin' : ''}`} />
+          </button>
+      </div>
+      
+       <div className="absolute bottom-[230px] right-4 z-10 space-y-3">
+           {filterButtons.map(filter => (
+               <button
+                   key={filter.id}
+                   onClick={() => handleCategoryFilterChange(filter.id as CareCategory | 'all')}
+                   className={`w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-transform hover:scale-105 ${filter.style} ${mapCategoryFilter === filter.id ? 'ring-2 ring-white ring-offset-2 ring-offset-gray-800/50' : ''}`}
+                   aria-label={`Filtrar por ${filter.name}`}
+               >
+                   {filter.icon}
+               </button>
+           ))}
+       </div>
+
+      {/* Unified Bottom Sheet */}
+      <div
+          ref={sheetRef}
+          className="absolute left-0 right-0 bg-white rounded-t-2xl shadow-2xl z-20"
+          style={{
+              transform: getSheetTransform(),
+              transition: 'transform 0.4s cubic-bezier(0.32, 0.72, 0, 1)',
+              height: 'calc(100vh - 80px)',
+          }}
+      >
+          <button onClick={toggleSheetState} className="w-full p-2 cursor-grab" aria-label="Expandir o contraer viñeta">
+              <div className="w-10 h-1.5 bg-slate-300 rounded-full mx-auto" />
+          </button>
+          
+          <div ref={sheetContentRef} className="h-full overflow-y-auto pb-48">
+             {selectedProvider ? (
+                // PROVIDER VIEW
+                <>
+                    <div className={`p-4 pt-0 transition-opacity ${sheetState === 'full' ? 'opacity-0 pointer-events-none h-0' : 'opacity-100'}`}>
+                        <div className="flex justify-between items-start">
+                             <div className="flex items-start space-x-4">
+                                <img src={selectedProvider.photoUrl} alt={selectedProvider.name} className="w-16 h-16 rounded-xl object-cover" />
+                                <div>
+                                    <h2 className="text-xl font-bold text-slate-800">{selectedProvider.name}</h2>
+                                    <p className="text-sm text-slate-500">{selectedProvider.location}</p>
+                                </div>
+                            </div>
+                            <div className="flex items-center space-x-1">
+                                <button className="p-2 text-slate-500 hover:bg-slate-100 rounded-full"><BookmarkIcon className="w-6 h-6" /></button>
+                                <button className="p-2 text-slate-500 hover:bg-slate-100 rounded-full"><ShareIcon className="w-6 h-6" /></button>
+                                <button onClick={handleSheetClose} className="p-2 text-slate-500 hover:bg-slate-100 rounded-full"><XMarkIcon className="w-6 h-6" /></button>
+                            </div>
+                        </div>
+                        <div className="mt-4 flex items-center space-x-3">
+                            <button onClick={() => onViewProfile(selectedProvider.id)} className="flex-1 bg-teal-500 text-white py-3 px-4 rounded-full font-semibold flex items-center justify-center space-x-2 hover:bg-teal-600 transition-colors">
+                                <UserCircleIcon className="w-5 h-5" />
+                                <span>Ver Perfil</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div className={`transition-opacity ${sheetState === 'full' ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+                        {/* The ProfileDetail component itself is not fixed, so it can scroll within this container */}
+                        <ProfileDetail provider={selectedProvider} isLoading={false} onBack={toggleSheetState} onBookNow={() => onViewProfile(selectedProvider.id)} />
+                    </div>
+                </>
+             ) : (
+                // LOCATION VIEW
+                <div className="p-4 pt-0">
+                    <div className="flex justify-between items-center">
+                        <h2 className="text-xl font-bold text-slate-800">C. el Amanecer, 7</h2>
+                        <div className="flex items-center space-x-2">
+                            <button className="p-2 text-slate-500 hover:bg-slate-100 rounded-full"><BookmarkIcon className="w-6 h-6" /></button>
+                            <button className="p-2 text-slate-500 hover:bg-slate-100 rounded-full"><ShareIcon className="w-6 h-6" /></button>
+                            <button onClick={() => setSheetState('hidden')} className="p-2 text-slate-500 hover:bg-slate-100 rounded-full"><XMarkIcon className="w-6 h-6" /></button>
+                        </div>
+                    </div>
+                    <div className="mt-4 flex items-center space-x-3">
+                        <button className="flex-1 bg-teal-500 text-white py-3 px-4 rounded-full font-semibold flex items-center justify-center space-x-2 hover:bg-teal-600 transition-colors">
+                            <DirectionsIcon className="w-5 h-5" />
+                            <span>Cómo llegar</span>
+                        </button>
+                        <button className="flex-1 bg-slate-100 text-slate-700 py-3 px-4 rounded-full font-semibold flex items-center justify-center space-x-2 hover:bg-slate-200 transition-colors">
+                            <PlayIcon className="w-5 h-5 -mr-1" />
+                            <span>Iniciar</span>
+                        </button>
+                        <button className="bg-slate-100 text-slate-700 py-3 px-4 rounded-full font-semibold flex items-center justify-center space-x-2 hover:bg-slate-200 transition-colors">
+                            <StorefrontIcon className="w-5 h-5" />
+                            <span>Directorio</span>
+                        </button>
+                    </div>
                 </div>
-                 <button 
-                    onClick={() => setIsExpanded(!isExpanded)} 
-                    className="p-2 text-slate-600 hover:text-teal-500 rounded-full hover:bg-slate-100 transition-colors"
-                    aria-label={isExpanded ? 'Contraer mapa' : 'Expandir mapa'}
-                >
-                    {isExpanded ? <ArrowsPointingInIcon className="w-6 h-6" /> : <ArrowsPointingOutIcon className="w-6 h-6" />}
-                </button>
-            </div>
-            <p className={`text-sm text-slate-600 transition-all duration-300 ${isExpanded ? 'md:ml-2' : 'md:ml-10'}`}>
-                Este mapa te permite encontrar cuidadores de confianza en tu zona. Pulsa sobre cualquier perfil para ver más detalles.
-            </p>
-        </header>
-
-        <div ref={mapContainerRef} className="w-full flex-grow z-10" />
-
-        <footer className={`flex-shrink-0 bg-gradient-to-t from-white to-slate-50/50 transition-all duration-300 ease-in-out ${isExpanded ? 'max-h-32 overflow-y-auto p-4 pt-2 border-t border-slate-200' : 'max-h-[300px] overflow-hidden p-4 border-t border-slate-200'}`}>
-            <h3 className="text-center font-bold text-lg text-slate-800 mb-1">Filtra por Servicio</h3>
-            <p className="text-center text-sm text-slate-500 mb-4">Pulsa una categoría para ver solo esos cuidadores.</p>
-            
-            <div className="grid grid-cols-4 gap-3 text-center">
-                
-                <button onClick={() => setSelectedMapCategory(CareCategory.ELDERLY)} className={`focus:outline-none rounded-xl focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-300 ${selectedMapCategory !== 'all' && selectedMapCategory !== CareCategory.ELDERLY ? 'opacity-50 hover:opacity-100' : 'opacity-100 scale-105'}`}>
-                    <div className="w-16 h-16 mx-auto rounded-2xl flex items-center justify-center" style={{ backgroundColor: categoryColors[CareCategory.ELDERLY], boxShadow: 'inset 3px 3px 6px rgba(255,255,255,0.4), inset -3px -3px 6px rgba(0,0,0,0.2), 2px 2px 5px rgba(0,0,0,0.1)' }}>
-                        <ElderlyIcon className="w-8 h-8 text-white" style={{ filter: 'drop-shadow(1px 1px 2px rgba(0,0,0,0.3))' }} />
-                    </div>
-                    <p className="mt-2 text-xs font-semibold text-slate-700">Mayores</p>
-                </button>
-
-                <button onClick={() => setSelectedMapCategory(CareCategory.CHILDREN)} className={`focus:outline-none rounded-xl focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 transition-all duration-300 ${selectedMapCategory !== 'all' && selectedMapCategory !== CareCategory.CHILDREN ? 'opacity-50 hover:opacity-100' : 'opacity-100 scale-105'}`}>
-                    <div className="w-16 h-16 mx-auto rounded-2xl flex items-center justify-center" style={{ backgroundColor: categoryColors[CareCategory.CHILDREN], boxShadow: 'inset 3px 3px 6px rgba(255,255,255,0.4), inset -3px -3px 6px rgba(0,0,0,0.2), 2px 2px 5px rgba(0,0,0,0.1)' }}>
-                        <ChildIcon className="w-8 h-8 text-white" style={{ filter: 'drop-shadow(1px 1px 2px rgba(0,0,0,0.3))' }} />
-                    </div>
-                    <p className="mt-2 text-xs font-semibold text-slate-700">Niños</p>
-                </button>
-                
-                <button onClick={() => setSelectedMapCategory(CareCategory.PETS)} className={`focus:outline-none rounded-xl focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-300 ${selectedMapCategory !== 'all' && selectedMapCategory !== CareCategory.PETS ? 'opacity-50 hover:opacity-100' : 'opacity-100 scale-105'}`}>
-                    <div className="w-16 h-16 mx-auto rounded-2xl flex items-center justify-center" style={{ backgroundColor: categoryColors[CareCategory.PETS], boxShadow: 'inset 3px 3px 6px rgba(255,255,255,0.4), inset -3px -3px 6px rgba(0,0,0,0.2), 2px 2px 5px rgba(0,0,0,0.1)' }}>
-                        <PetIcon className="w-8 h-8 text-white" style={{ filter: 'drop-shadow(1px 1px 2px rgba(0,0,0,0.3))' }} />
-                    </div>
-                    <p className="mt-2 text-xs font-semibold text-slate-700">Mascotas</p>
-                </button>
-                
-                <button onClick={() => setSelectedMapCategory('all')} className={`focus:outline-none rounded-xl focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition-all duration-300 ${selectedMapCategory !== 'all' ? 'opacity-50 hover:opacity-100' : 'opacity-100 scale-105'}`}>
-                    <div className="w-16 h-16 mx-auto rounded-2xl flex items-center justify-center" style={{ backgroundColor: categoryColors['multiple'], boxShadow: 'inset 3px 3px 6px rgba(255,255,255,0.4), inset -3px -3px 6px rgba(0,0,0,0.2), 2px 2px 5px rgba(0,0,0,0.1)' }}>
-                        <UsersIcon className="w-8 h-8 text-white" style={{ filter: 'drop-shadow(1px 1px 2px rgba(0,0,0,0.3))' }} />
-                    </div>
-                    <p className="mt-2 text-xs font-semibold text-slate-700">Todos</p>
-                </button>
-
-            </div>
-        </footer>
+             )}
+          </div>
       </div>
     </div>
   );
