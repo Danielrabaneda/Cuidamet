@@ -1,5 +1,5 @@
 import React from 'react';
-import { LegalDocument } from '../App';
+import { LegalDocument } from '../types';
 
 export const legalDocuments: LegalDocument[] = [
   {
@@ -26,6 +26,17 @@ export const legalDocuments: LegalDocument[] = [
 
         <h2>4. Obligaciones del Usuario</h2>
         <p>Usted se compromete a proporcionar información precisa y completa, a tratar a los Cuidadores con respeto y a cumplir con todas las leyes aplicables al contratar servicios de cuidado.</p>
+        
+        <h2>5. Suscripción Cuidamet Premium para Cuidadores</h2>
+        <p>Cuidamet ofrece un servicio de suscripción opcional para Cuidadores, denominado "Cuidamet Premium", diseñado para aumentar su visibilidad en la plataforma.</p>
+        <p><strong>Beneficios:</strong> Los suscriptores de Cuidamet Premium disfrutarán de:</p>
+        <ul>
+          <li><strong>Posicionamiento Preferencial:</strong> Sus perfiles aparecerán en las primeras posiciones de los resultados de búsqueda, por encima de los perfiles no premium.</li>
+          <li><strong>Insignia Premium:</strong> Una insignia distintiva se mostrará en su perfil y tarjeta de cuidador, indicando su estatus Premium.</li>
+          <li><strong>Marcador Destacado en el Mapa:</strong> Su marcador en la vista de mapa será visualmente diferente para atraer más atención.</li>
+        </ul>
+        <p><strong>Tarifas y Facturación:</strong> La suscripción a Cuidamet Premium tiene un coste de 9,99€ al mes (impuestos incluidos). El pago se realizará mensualmente y se renovará automáticamente al final de cada período de facturación, a menos que se cancele. Cuidamet se reserva el derecho de modificar la tarifa de suscripción, notificando a los usuarios con antelación.</p>
+        <p><strong>Cancelación:</strong> El Cuidador puede cancelar su suscripción Premium en cualquier momento desde la configuración de su perfil. La cancelación será efectiva al final del período de facturación actual, y el Cuidador continuará disfrutando de los beneficios Premium hasta esa fecha. No se realizarán reembolsos por períodos de suscripción parciales.</p>
       </>
     ),
   },

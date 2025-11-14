@@ -63,6 +63,16 @@ const MyCaregiverProfilePage: React.FC<MyCaregiverProfilePageProps> = ({ onBack,
         </div>
         
         <section className="mb-6">
+            <div className="bg-gradient-to-r from-amber-400 to-orange-500 p-5 rounded-xl text-white shadow-lg">
+                <h3 className="font-bold text-lg">🚀 ¡Impulsa tu perfil con Premium!</h3>
+                <p className="text-sm mt-1">Aparece primero, destaca en el mapa y consigue más familias. ¡Actualiza ahora!</p>
+                <button className="mt-3 bg-white text-amber-600 font-bold py-2 px-4 rounded-lg text-sm hover:bg-amber-50 transition-colors">
+                    Hazte Premium por 9,99€/mes
+                </button>
+            </div>
+        </section>
+
+        <section className="mb-6">
             <button 
                 onClick={() => setIsStatsVisible(!isStatsVisible)}
                 className="w-full flex items-center justify-between bg-white p-4 rounded-xl border border-slate-200 shadow-sm text-left hover:bg-slate-50 transition-colors"

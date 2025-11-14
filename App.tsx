@@ -1,7 +1,7 @@
 
 
 import React, { useState, useEffect } from 'react';
-import { CareCategory, Provider, ChatConversation, Message, BookingDetails } from './types';
+import { CareCategory, Provider, ChatConversation, Message, BookingDetails, LegalDocument } from './types';
 import { MOCK_PROVIDERS } from './services/mockData';
 import { MOCK_CHATS } from './services/mockChatData';
 import Header from './components/Header';
@@ -57,13 +57,6 @@ const getDistanceInKm = (lat1: number, lon1: number, lat2: number, lon2: number)
 };
 
 type View = 'landing' | 'providers' | 'favorites' | 'profile' | 'offer' | 'inbox' | 'chat' | 'myProfile' | 'map' | 'prices' | 'security' | 'verification' | 'help' | 'about' | 'blog' | 'contact' | 'settings' | 'editProfile' | 'securitySettings' | 'notifications' | 'legalInfo' | 'legalDocument' | 'myCaregiverProfile' | 'booking' | 'payment' | 'confirmation' | 'support' | 'supportChat' | 'supportEmail';
-
-export interface LegalDocument {
-  id: string;
-  title: string;
-  description: string;
-  content: React.ReactNode;
-}
 
 
 const App: React.FC = () => {
@@ -473,6 +466,7 @@ const App: React.FC = () => {
           isLoading={isProfileLoading}
           onBack={handleBackToList}
           onBookNow={handleStartBooking}
+          onContact={handleContactProvider}
         />
       );
     }
@@ -614,7 +608,11 @@ const App: React.FC = () => {
             return nameMatch || locationMatch || serviceMatch || descriptionMatch;
         });
 
-        const filteredProviders = searchedProviders.sort((a, b) => (a.distance ?? Infinity) - (b.distance ?? Infinity));
+        const filteredProviders = searchedProviders.sort((a, b) => {
+            if (a.isPremium && !b.isPremium) return -1;
+            if (!a.isPremium && b.isPremium) return 1;
+            return (a.distance ?? Infinity) - (b.distance ?? Infinity);
+        });
 
         if (view === 'favorites' && navigationContext === 'myProfile') {
             return (

@@ -2,6 +2,7 @@ import React from 'react';
 import PageHeader from './PageHeader';
 import CheckCircleIcon from './icons/CheckCircleIcon';
 import TicketIcon from './icons/TicketIcon';
+import StarIcon from './icons/StarIcon';
 
 interface PricesPageProps {
   onBack: () => void;
@@ -53,6 +54,22 @@ const PricesPage: React.FC<PricesPageProps> = ({ onBack }) => {
               Aplicamos una comisión de servicio transparente sobre tus ganancias. Esto cubre la gestión de pagos seguros, soporte 24/7 y la promoción de tu perfil.
             </p>
           </div>
+          
+          <div className="md:col-span-2 bg-gradient-to-r from-purple-50 to-indigo-50 p-6 rounded-xl border border-purple-200 ring-2 ring-purple-100">
+            <h3 className="text-xl font-bold text-purple-700 flex items-center"><StarIcon className="w-6 h-6 mr-2" /> Cuidamet Premium</h3>
+            <p className="text-purple-600 mt-2">Destaca sobre el resto y consigue más trabajos.</p>
+            <div className="mt-6">
+                <p className="text-4xl font-bold text-slate-800">9,99€<span className="text-lg font-medium text-slate-500">/mes</span></p>
+                <p className="text-slate-500">La mitad de lo que cobran otras plataformas.</p>
+            </div>
+            <ul className="mt-6 space-y-3 text-slate-700">
+                <li className="flex items-start"><CheckCircleIcon className="w-5 h-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />Aparece en las primeras posiciones en las búsquedas.</li>
+                <li className="flex items-start"><CheckCircleIcon className="w-5 h-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />Consigue una insignia "Premium" exclusiva en tu perfil.</li>
+                <li className="flex items-start"><CheckCircleIcon className="w-5 h-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />Tu marcador destacará en el mapa para atraer miradas.</li>
+            </ul>
+            <button className="w-full mt-6 bg-purple-600 text-white font-semibold py-3 rounded-lg hover:bg-purple-700 transition-colors">Hazte Premium</button>
+          </div>
+
         </div>
 
         <section className="mt-16">

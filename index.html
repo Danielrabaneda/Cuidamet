@@ -71,12 +71,20 @@
       transform: scale(1.15) translateY(-6px);
       z-index: 1000 !important;
     }
-    .custom-marker-pin.selected .pin-body {
+    .custom-marker-pin.selected .pin-body, .distinguished-marker.selected .pin-body {
       border-color: #f59e0b; /* amber-500 */
       box-shadow: 0 0 15px rgba(245, 158, 11, 0.7);
     }
-    .custom-marker-pin.selected .pin-pointer {
+    .custom-marker-pin.selected .pin-pointer, .distinguished-marker.selected .pin-pointer {
         border-top-color: #f59e0b; /* amber-500 */
+    }
+    /* Styles for distinguished (premium, top-rated) markers */
+    .distinguished-marker .pin-body {
+        border-color: #f59e0b; /* amber-500 */
+        box-shadow: 0 0 12px rgba(245, 158, 11, 0.8), 0 0 4px rgba(245, 158, 11, 0.6);
+    }
+    .distinguished-marker .pin-pointer {
+        border-top-color: #f59e0b;
     }
     /* Styles for user location marker */
     .user-location-marker {
@@ -123,9 +131,11 @@
 <script type="importmap">
 {
   "imports": {
-    "react/": "https://aistudiocdn.com/react@^19.2.0/",
-    "react": "https://aistudiocdn.com/react@^19.2.0",
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/"
+    "react": "https://esm.sh/react@18.2.0",
+    "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
+    "@google/genai": "https://esm.sh/@google/genai@0.14.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/"
   }
 }
 </script>

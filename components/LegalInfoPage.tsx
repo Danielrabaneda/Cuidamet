@@ -2,7 +2,8 @@ import React from 'react';
 import PageHeader from './PageHeader';
 import DocumentTextIcon from './icons/DocumentTextIcon';
 import ChevronRightIcon from './icons/ChevronRightIcon';
-import { LegalDocument } from '../App';
+// FIX: Corrected the import path for the LegalDocument type.
+import { LegalDocument } from '../types';
 
 interface LegalInfoPageProps {
   onBack: () => void;

@@ -11,6 +11,7 @@ import CurrencyDollarIcon from './icons/CurrencyDollarIcon';
 import ChevronRightIcon from './icons/ChevronRightIcon';
 import CreditCardIcon from './icons/CreditCardIcon';
 import StarRating from './StarRating';
+import ChatBubbleLeftRightIcon from './icons/ChatBubbleLeftRightIcon';
 
 
 interface ProfileDetailProps {
@@ -18,6 +19,7 @@ interface ProfileDetailProps {
   isLoading: boolean;
   onBack: () => void;
   onBookNow: (providerId: number) => void;
+  onContact: (providerId: number) => void;
 }
 
 const categoryDisplayNames: Record<CareCategory, string> = {
@@ -52,7 +54,7 @@ const DetailHeader: React.FC<{ title: string; onBack: () => void }> = ({ title, 
     </header>
 );
 
-const ProfileDetail: React.FC<ProfileDetailProps> = ({ provider, isLoading, onBack, onBookNow }) => {
+const ProfileDetail: React.FC<ProfileDetailProps> = ({ provider, isLoading, onBack, onBookNow, onContact }) => {
     
   if (isLoading) {
     return (
@@ -214,10 +216,17 @@ const ProfileDetail: React.FC<ProfileDetailProps> = ({ provider, isLoading, onBa
 
        {/* Fixed Footer/Action Button */}
        <footer className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-lg border-t border-slate-200 z-10">
-        <div className="container mx-auto px-4 py-3">
+        <div className="container mx-auto px-4 py-3 flex items-center gap-3">
+          <button
+            onClick={() => onContact(provider.id)}
+            className="flex-1 bg-white border border-slate-300 text-slate-700 px-4 py-3 rounded-xl font-semibold hover:bg-slate-100 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 flex items-center justify-center text-lg"
+          >
+            <ChatBubbleLeftRightIcon className="w-6 h-6 mr-2" />
+            Chatear
+          </button>
           <button 
             onClick={() => onBookNow(provider.id)}
-            className="w-full bg-teal-500 text-white px-4 py-3 rounded-xl font-semibold hover:bg-teal-600 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 flex items-center justify-center text-lg">
+            className="flex-[2] bg-teal-500 text-white px-4 py-3 rounded-xl font-semibold hover:bg-teal-600 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 flex items-center justify-center text-lg">
             <CreditCardIcon className="w-6 h-6 mr-2"/>
             Reservar Ahora
           </button>

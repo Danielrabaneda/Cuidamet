@@ -16,7 +16,8 @@ interface ProviderCardProps {
 }
 
 const getBadgeColor = (badge: string) => {
-    if (badge.toLowerCase().includes('mejor valorado')) return 'bg-amber-100 text-amber-800';
+    if (badge.toLowerCase().includes('premium')) return 'bg-amber-100 text-amber-800 border border-amber-300';
+    if (badge.toLowerCase().includes('mejor valorado')) return 'bg-yellow-100 text-yellow-800';
     if (badge.toLowerCase().includes('experto')) return 'bg-blue-100 text-blue-800';
     if (badge.toLowerCase().includes('rápida')) return 'bg-green-100 text-green-800';
     return 'bg-slate-100 text-slate-800';

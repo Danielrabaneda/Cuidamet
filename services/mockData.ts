@@ -10,6 +10,7 @@ export const MOCK_PROVIDERS: Provider[] = [
     distance: 0,
     rating: 4.9,
     reviewsCount: 34,
+    isPremium: true,
     descriptions: [
       { category: CareCategory.ELDERLY, text: 'Como enfermera con 10 años de experiencia geriátrica, ofrezco cuidados médicos especializados, gestión de medicación y un trato compasivo.' },
       { category: CareCategory.CHILDREN, text: 'Con experiencia pediátrica, brindo un cuidado infantil seguro y estimulante. Paciente y profesional, creo un entorno de confianza para los más pequeños.' }
@@ -23,7 +24,7 @@ export const MOCK_PROVIDERS: Provider[] = [
         { id: 2, authorName: 'Javier P.', authorPhotoUrl: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=200', rating: 5, comment: 'Contraté a Ana para cuidar de mis hijos y no puedo estar más contento. Es creativa, responsable y los niños se lo pasan genial con ella.', date: 'Hace 3 semanas' },
         { id: 3, authorName: 'Carmen R.', authorPhotoUrl: 'https://images.unsplash.com/photo-1554151228-14d9def656e4?q=80&w=200', rating: 4, comment: 'Muy buena profesional, aunque a veces es un poco difícil contactar con ella por la alta demanda que tiene. Por lo demás, todo perfecto.', date: 'Hace 1 mes' }
     ],
-    badges: ['Mejor Valorado', 'Respuesta Rápida']
+    badges: ['Premium', 'Mejor Valorado', 'Respuesta Rápida']
   },
   {
     id: 2,
@@ -55,6 +56,7 @@ export const MOCK_PROVIDERS: Provider[] = [
     distance: 0,
     rating: 5.0,
     reviewsCount: 42,
+    isPremium: true,
     descriptions: [
       { category: CareCategory.PETS, text: 'Técnica veterinaria y amante de los animales de toda la vida. Especializada en paseos de perros, cuidado a domicilio y administración de medicamentos.' }
     ],
@@ -66,7 +68,7 @@ export const MOCK_PROVIDERS: Provider[] = [
       { id: 6, authorName: 'Marta V.', authorPhotoUrl: 'https://images.unsplash.com/photo-1607746882042-944635dfe10e?q=80&w=200', rating: 5, comment: 'Laura es la mejor cuidadora que podría desear para mis dos perros. Se nota que le apasionan los animales y ellos la adoran. Confianza 100%.', date: 'Hace 5 días' },
       { id: 7, authorName: 'Sergio L.', authorPhotoUrl: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=200', rating: 5, comment: 'Impecable. Cuidó de mi gato mientras estaba de vacaciones y me mantuvo informado con fotos todos los días. Un servicio de 10.', date: 'Hace 1 mes' }
     ],
-    badges: ['Experta en Mascotas']
+    badges: ['Premium', 'Experta en Mascotas']
   },
   {
     id: 4,

@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { GoogleGenAI, Chat } from '@google/genai';
 import { Message } from '../types';
 import ChevronLeftIcon from './icons/ChevronLeftIcon';
 import PaperAirplaneIcon from './icons/PaperAirplaneIcon';
@@ -19,7 +20,33 @@ const SupportChatPage: React.FC<SupportChatPageProps> = ({ onBack }) => {
     }
   ]);
   const [newMessage, setNewMessage] = useState('');
+  const [isBotTyping, setIsBotTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const chatRef = useRef<Chat | null>(null);
+
+  useEffect(() => {
+    const initializeChat = () => {
+      try {
+        const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+        chatRef.current = ai.chats.create({
+          model: 'gemini-2.5-flash',
+          config: {
+            systemInstruction: `You are Cuidi, a friendly and helpful support assistant for the Cuidamet app. Cuidamet is an app for finding trusted local caregivers for seniors, children, and pets. Your tone should be warm, reassuring, and professional. Answer user questions about how to use the app, pricing, security, and how to become a caregiver. Keep your answers concise and easy to understand. Your responses should be in Spanish.`,
+          },
+        });
+      } catch (error) {
+        console.error("Failed to initialize Gemini Chat:", error);
+        setMessages(prev => [...prev, {
+          id: Date.now(),
+          text: 'Lo siento, estoy teniendo problemas para conectar. Por favor, inténtalo de nuevo más tarde.',
+          sender: 'other',
+          timestamp: new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
+          read: true,
+        }]);
+      }
+    };
+    initializeChat();
+  }, []);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -27,21 +54,64 @@ const SupportChatPage: React.FC<SupportChatPageProps> = ({ onBack }) => {
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [messages, isBotTyping]);
 
-  const handleSendMessage = (e: React.FormEvent) => {
+  const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (newMessage.trim()) {
-      const userMessage: Message = {
-        id: Date.now(),
-        text: newMessage.trim(),
-        sender: 'me',
+    const trimmedMessage = newMessage.trim();
+    if (!trimmedMessage || isBotTyping || !chatRef.current) return;
+
+    const userMessage: Message = {
+      id: Date.now(),
+      text: trimmedMessage,
+      sender: 'me',
+      timestamp: new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
+      read: true,
+    };
+    setMessages(prev => [...prev, userMessage]);
+    setNewMessage('');
+    setIsBotTyping(true);
+
+    try {
+      const stream = await chatRef.current.sendMessageStream({ message: trimmedMessage });
+
+      let botResponseText = '';
+      const botMessageId = Date.now() + 1;
+      let firstChunkReceived = false;
+
+      for await (const chunk of stream) {
+        if (!firstChunkReceived) {
+          setIsBotTyping(false);
+          firstChunkReceived = true;
+          botResponseText = chunk.text;
+          setMessages(prev => [...prev, {
+            id: botMessageId,
+            text: botResponseText,
+            sender: 'other',
+            timestamp: new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
+            read: true,
+          }]);
+        } else {
+          botResponseText += chunk.text;
+          setMessages(prev => prev.map(msg => 
+            msg.id === botMessageId ? { ...msg, text: botResponseText } : msg
+          ));
+        }
+      }
+      if (!firstChunkReceived) {
+         setIsBotTyping(false);
+      }
+    } catch (error) {
+      console.error("Gemini API error:", error);
+      setIsBotTyping(false);
+      const errorMessage: Message = {
+        id: Date.now() + 1,
+        text: 'Oops, algo ha salido mal. Por favor, inténtalo de nuevo.',
+        sender: 'other',
         timestamp: new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
         read: true,
       };
-      setMessages(prev => [...prev, userMessage]);
-      setNewMessage('');
-      // Here you would call the AI API
+      setMessages(prev => [...prev, errorMessage]);
     }
   };
 
@@ -69,7 +139,7 @@ const SupportChatPage: React.FC<SupportChatPageProps> = ({ onBack }) => {
             className={`flex items-end gap-2 ${message.sender === 'me' ? 'justify-end' : 'justify-start'}`}
           >
             {message.sender === 'other' && (
-              <div className="w-6 h-6 p-0.5 bg-teal-500 rounded-full flex items-center justify-center self-start">
+              <div className="w-6 h-6 p-0.5 bg-teal-500 rounded-full flex items-center justify-center self-start flex-shrink-0">
                   <CuidametIcon className="text-white" />
               </div>
             )}
@@ -80,13 +150,27 @@ const SupportChatPage: React.FC<SupportChatPageProps> = ({ onBack }) => {
                   : 'bg-white text-slate-700 rounded-bl-lg border border-slate-200'
               }`}
             >
-              <p className="text-sm">{message.text}</p>
+              <p className="text-sm whitespace-pre-wrap">{message.text}</p>
               <p className={`text-xs mt-1 ${message.sender === 'me' ? 'text-teal-100' : 'text-slate-400'} text-right`}>
                   {message.timestamp}
               </p>
             </div>
           </div>
         ))}
+        {isBotTyping && (
+          <div className="flex items-end gap-2 justify-start">
+            <div className="w-6 h-6 p-0.5 bg-teal-500 rounded-full flex items-center justify-center self-start flex-shrink-0">
+                <CuidametIcon className="text-white" />
+            </div>
+            <div className="max-w-xs md:max-w-md p-3 rounded-2xl bg-white text-slate-700 rounded-bl-lg border border-slate-200">
+              <div className="flex items-center space-x-1">
+                <span className="h-1.5 w-1.5 bg-slate-400 rounded-full animate-bounce [animation-delay:-0.3s]"></span>
+                <span className="h-1.5 w-1.5 bg-slate-400 rounded-full animate-bounce [animation-delay:-0.15s]"></span>
+                <span className="h-1.5 w-1.5 bg-slate-400 rounded-full animate-bounce"></span>
+              </div>
+            </div>
+          </div>
+        )}
          <div ref={messagesEndRef} />
       </main>
 
@@ -103,7 +187,7 @@ const SupportChatPage: React.FC<SupportChatPageProps> = ({ onBack }) => {
           <button
             type="submit"
             className="bg-teal-500 text-white rounded-full p-3 flex-shrink-0 hover:bg-teal-600 transition-colors disabled:bg-slate-300 disabled:cursor-not-allowed"
-            disabled={!newMessage.trim()}
+            disabled={!newMessage.trim() || isBotTyping}
             aria-label="Enviar mensaje"
           >
             <PaperAirplaneIcon className="w-6 h-6" />
