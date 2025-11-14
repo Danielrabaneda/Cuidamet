@@ -1,5 +1,4 @@
 
-
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { Provider, CareCategory } from '../types';
 import ProfileDetail from './ProfileDetail'; // To show full details
@@ -71,10 +70,15 @@ const MapView: React.FC<MapViewProps> = ({ providers, userLocation, onViewProfil
   const [selectedProvider, setSelectedProvider] = useState<Provider | null>(null);
   const [sheetState, setSheetState] = useState<'hidden' | 'partial' | 'full'>('hidden');
   const [mapCategoryFilter, setMapCategoryFilter] = useState<CareCategory | 'all'>('all');
+  const [maxPriceFilter, setMaxPriceFilter] = useState<number | null>(null);
 
   // Unified Sheet Logic
   const sheetRef = useRef<HTMLDivElement>(null);
   const sheetContentRef = useRef<HTMLDivElement>(null);
+  
+  const isProvider = !!selectedProvider;
+  const partialSheetHeight = isProvider ? 280 : 210;
+  const controlsBottomPosition = sheetState === 'hidden' ? 24 : (partialSheetHeight + 16);
 
   const filterButtons = [
     { id: 'all', name: 'Todos', icon: <QueueListIcon className="w-6 h-6"/>, style: 'bg-slate-800 text-white' },
@@ -174,7 +178,10 @@ const MapView: React.FC<MapViewProps> = ({ providers, userLocation, onViewProfil
       const provider = providers.find(p => p.id === Number(id));
       if (!provider) return;
       
-      const shouldBeVisible = mapCategoryFilter === 'all' || provider.categories.includes(mapCategoryFilter as CareCategory);
+      const categoryMatch = mapCategoryFilter === 'all' || provider.categories.includes(mapCategoryFilter as CareCategory);
+      const priceMatch = maxPriceFilter === null || provider.hourlyRate <= maxPriceFilter;
+      
+      const shouldBeVisible = categoryMatch && priceMatch;
       
       if (shouldBeVisible) {
         if (!mapRef.current.hasLayer(marker)) (marker as any).addTo(mapRef.current);
@@ -182,7 +189,7 @@ const MapView: React.FC<MapViewProps> = ({ providers, userLocation, onViewProfil
         if (mapRef.current.hasLayer(marker)) mapRef.current.removeLayer(marker);
       }
     });
-  }, [mapCategoryFilter, providers, isMapInitialized]);
+  }, [mapCategoryFilter, maxPriceFilter, providers, isMapInitialized]);
 
 
   const handleSheetClose = () => {
@@ -210,8 +217,13 @@ const MapView: React.FC<MapViewProps> = ({ providers, userLocation, onViewProfil
   };
   
   const handleCategoryFilterChange = (category: CareCategory | 'all') => {
-      setMapCategoryFilter(prev => (prev === category ? 'all' : category));
-      if (selectedProvider) handleSheetClose();
+      setMapCategoryFilter(category);
+      if (selectedProvider && category !== 'all' && !selectedProvider.categories.includes(category)) {
+          handleSheetClose();
+      }
+      if (selectedProvider && maxPriceFilter !== null && selectedProvider.hourlyRate > maxPriceFilter) {
+          handleSheetClose();
+      }
   };
 
 
@@ -226,32 +238,58 @@ const MapView: React.FC<MapViewProps> = ({ providers, userLocation, onViewProfil
               <button onClick={onBack} className="p-3 text-slate-500 hover:text-teal-500">
                   <ChevronLeftIcon className="w-6 h-6" />
               </button>
-              <input type="text" placeholder="Buscar una dirección..." className="w-full h-full bg-transparent py-3 focus:outline-none text-slate-800 placeholder:text-slate-400" />
+              <input type="text" placeholder="Busqueda por precio..." className="w-full h-full bg-transparent py-3 focus:outline-none text-slate-800 placeholder:text-slate-400" />
               <button className="p-3 text-slate-500 hover:text-slate-800">
                   <XMarkIcon className="w-6 h-6" />
               </button>
           </div>
       </div>
 
-      <div className="absolute top-20 right-4 z-10 space-y-3 pointer-events-none">
-          <button className="bg-white rounded-full shadow-lg p-3 block ml-auto pointer-events-auto"><LayersIcon className="w-6 h-6 text-slate-700"/></button>
-          <button onClick={handleRecenter} className="bg-white rounded-full shadow-lg p-3 block ml-auto pointer-events-auto">
-            <GpsFixedIcon className={`w-6 h-6 text-slate-700 ${isLocationLoading ? 'animate-spin' : ''}`} />
-          </button>
+      <div className="absolute top-20 right-4 z-10 pointer-events-auto">
+          <button className="bg-white rounded-full shadow-lg p-3 block ml-auto"><LayersIcon className="w-6 h-6 text-slate-700"/></button>
       </div>
       
-       <div className="absolute bottom-[230px] right-4 z-10 space-y-3">
-           {filterButtons.map(filter => (
-               <button
-                   key={filter.id}
-                   onClick={() => handleCategoryFilterChange(filter.id as CareCategory | 'all')}
-                   className={`w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-transform hover:scale-105 ${filter.style} ${mapCategoryFilter === filter.id ? 'ring-2 ring-white ring-offset-2 ring-offset-gray-800/50' : ''}`}
-                   aria-label={`Filtrar por ${filter.name}`}
-               >
-                   {filter.icon}
-               </button>
-           ))}
-       </div>
+      <div 
+        className="absolute right-4 z-10 flex flex-col items-end gap-3 pointer-events-none transition-all duration-300 ease-out"
+        style={{ bottom: `${controlsBottomPosition}px` }}
+      >
+        <button 
+            onClick={handleRecenter} 
+            className="bg-white rounded-full shadow-lg p-3 block pointer-events-auto transition-transform hover:scale-105"
+            aria-label="Centrar en mi ubicación"
+        >
+            <GpsFixedIcon className={`w-6 h-6 text-slate-700 ${isLocationLoading ? 'animate-spin' : ''}`} />
+        </button>
+
+        <div className="bg-white rounded-full shadow-lg p-2 flex items-center pointer-events-auto w-40">
+            <label htmlFor="price-filter" className="text-slate-500 pl-2 text-sm whitespace-nowrap">Precio max:</label>
+            <input
+                id="price-filter"
+                type="number"
+                placeholder="€/hr"
+                value={maxPriceFilter === null ? '' : String(maxPriceFilter)}
+                onChange={(e) => {
+                    const val = e.target.value;
+                    setMaxPriceFilter(val === '' ? null : Number(val));
+                }}
+                className="w-full bg-transparent text-right pr-2 text-slate-800 font-semibold focus:outline-none [-moz-appearance:_textfield] [&::-webkit-outer-spin-button]:m-0 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:m-0 [&::-webkit-inner-spin-button]:appearance-none"
+            />
+        </div>
+
+        <div className="flex flex-col gap-3 pointer-events-auto">
+            {filterButtons.map(filter => (
+                <button
+                    key={filter.id}
+                    onClick={() => handleCategoryFilterChange(filter.id as CareCategory | 'all')}
+                    className={`w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-all duration-200 hover:scale-105 ${mapCategoryFilter === filter.id ? 'ring-2 ring-white ring-offset-2 ' + filter.style : filter.style + ' opacity-90 hover:opacity-100'}`}
+                    aria-label={`Filtrar por ${filter.name}`}
+                >
+                    {filter.icon}
+                </button>
+            ))}
+        </div>
+      </div>
+
 
       {/* Unified Bottom Sheet */}
       <div
@@ -303,27 +341,24 @@ const MapView: React.FC<MapViewProps> = ({ providers, userLocation, onViewProfil
                 // LOCATION VIEW
                 <div className="p-4 pt-0">
                     <div className="flex justify-between items-center">
-                        <h2 className="text-xl font-bold text-slate-800">C. el Amanecer, 7</h2>
+                        <h2 className="text-xl font-bold text-slate-800">Explora el mapa</h2>
                         <div className="flex items-center space-x-2">
-                            <button className="p-2 text-slate-500 hover:bg-slate-100 rounded-full"><BookmarkIcon className="w-6 h-6" /></button>
-                            <button className="p-2 text-slate-500 hover:bg-slate-100 rounded-full"><ShareIcon className="w-6 h-6" /></button>
                             <button onClick={() => setSheetState('hidden')} className="p-2 text-slate-500 hover:bg-slate-100 rounded-full"><XMarkIcon className="w-6 h-6" /></button>
                         </div>
                     </div>
-                    <div className="mt-4 flex items-center space-x-3">
-                        <button className="flex-1 bg-teal-500 text-white py-3 px-4 rounded-full font-semibold flex items-center justify-center space-x-2 hover:bg-teal-600 transition-colors">
-                            <DirectionsIcon className="w-5 h-5" />
-                            <span>Cómo llegar</span>
-                        </button>
-                        <button className="flex-1 bg-slate-100 text-slate-700 py-3 px-4 rounded-full font-semibold flex items-center justify-center space-x-2 hover:bg-slate-200 transition-colors">
-                            <PlayIcon className="w-5 h-5 -mr-1" />
-                            <span>Iniciar</span>
-                        </button>
-                        <button className="bg-slate-100 text-slate-700 py-3 px-4 rounded-full font-semibold flex items-center justify-center space-x-2 hover:bg-slate-200 transition-colors">
-                            <StorefrontIcon className="w-5 h-5" />
-                            <span>Directorio</span>
-                        </button>
-                    </div>
+                    <p className="text-slate-600 mt-2">Usa los filtros de la derecha para encontrar cuidadores. Toca un marcador para ver los detalles.</p>
+                    {!userLocation && (
+                        <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-center">
+                            <p className="text-sm text-yellow-800">
+                                {isLocationLoading ? 'Buscando tu ubicación...' : 'Activa tu ubicación para ver cuidadores cerca de ti.'}
+                            </p>
+                            {!isLocationLoading && 
+                                <button onClick={handleRecenter} className="mt-2 text-sm font-semibold text-yellow-900 bg-yellow-200 px-3 py-1 rounded-md">
+                                    Activar
+                                </button>
+                            }
+                        </div>
+                    )}
                 </div>
              )}
           </div>
